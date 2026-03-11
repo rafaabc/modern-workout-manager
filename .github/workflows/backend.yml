@@ -58,4 +58,4 @@ jobs:
           node-version: 21
           cache: npm
       - run: npm ci
-      - run: npm run test:api:coverage --workspace=backend
+      - run: npm run test:api --workspace=backend
