@@ -16,7 +16,7 @@ Built by a QA Engineer exploring generative AI as a development and test automat
 
 | Technology | Purpose |
 |---|---|
-| Node.js 21+ | Runtime |
+| Node.js 22+ | Runtime |
 | Express | HTTP framework |
 | better-sqlite3 | SQLite database |
 | JSON Web Token | Stateless authentication |
