@@ -115,6 +115,147 @@
           }
         }
       }
+    },
+    "/api/workouts/calendar": {
+      "get": {
+        "tags": ["Workouts"],
+        "summary": "Get workout calendar for a month",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 12 },
+            "example": 1
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 },
+            "example": 2025
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workout days",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/WorkoutResponse" }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Workouts"],
+        "summary": "Schedule a workout",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WorkoutRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Workout scheduled",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WorkoutResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Workout already scheduled for this date",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Workouts"],
+        "summary": "Unschedule a workout",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WorkoutRequest" }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Workout removed"
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Workout not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -193,6 +334,50 @@
           "error": {
             "type": "string",
             "example": "Error description"
+          }
+        }
+      },
+      "WorkoutRequest": {
+        "type": "object",
+        "required": ["day", "month", "year"],
+        "properties": {
+          "day": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 31,
+            "example": 15
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "example": 1
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 2025
+          }
+        }
+      },
+      "WorkoutResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "day": {
+            "type": "integer",
+            "example": 15
+          },
+          "month": {
+            "type": "integer",
+            "example": 1
+          },
+          "year": {
+            "type": "integer",
+            "example": 2025
           }
         }
       }
