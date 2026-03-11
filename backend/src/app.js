@@ -51,6 +51,13 @@ export function createApp(dbPath) {
   app.use('/api/workouts', workoutRoutes);
   app.use('/api/metrics', metricsRoutes);
 
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(join(__dirname, '../../frontend/dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(join(__dirname, '../../frontend/dist/index.html'));
+    });
+  }
+
   app.db = db;
 
   return app;
