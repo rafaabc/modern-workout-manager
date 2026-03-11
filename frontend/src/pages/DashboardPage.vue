@@ -1,8 +1,10 @@
 <template>
-  <div>
-    <h1>Dashboard</h1>
-    <WorkoutCalendar />
-    <WorkoutsMetrics />
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-white mb-6">Dashboard</h1>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <WorkoutCalendar />
+      <WorkoutsMetrics />
+    </div>
   </div>
 </template>
 

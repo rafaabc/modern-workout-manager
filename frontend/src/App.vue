@@ -1,6 +1,8 @@
 <template>
-  <AppHeader />
-  <router-view />
+  <div class="bg-gray-950 min-h-screen text-white">
+    <AppHeader />
+    <router-view />
+  </div>
 </template>
 
 <script setup>
