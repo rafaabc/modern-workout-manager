@@ -2,11 +2,16 @@ import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import jwt from 'jsonwebtoken';
 import { createTestServer } from '../testServer.js';
+import { randomPassword, randomSecret } from '../../helpers/testCredentials.js';
 
 describe('Auth API', () => {
   let testServer;
   let baseUrl;
-  const JWT_SECRET = 'test-api-secret';
+  const JWT_SECRET = randomSecret();
+  const registerPassword = randomPassword();
+  const loginPassword = randomPassword();
+  const wrongPassword = randomPassword();
+  const weakInput = 'short';
 
   before(async () => {
     process.env.JWT_SECRET = JWT_SECRET;
@@ -24,7 +29,7 @@ describe('Auth API', () => {
       const res = await fetch(`${baseUrl}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'testuser', password: 'Secret123' }),
+        body: JSON.stringify({ username: 'testuser', password: registerPassword }),
       });
 
       assert.equal(res.status, 201);
@@ -39,14 +44,14 @@ describe('Auth API', () => {
       assert.ok(dbUser);
       assert.equal(dbUser.username, 'testuser');
       assert.ok(dbUser.password);
-      assert.notEqual(dbUser.password, 'Secret123'); // should be hashed
+      assert.notEqual(dbUser.password, registerPassword); // should be hashed
     });
 
     it('should return 409 for duplicate username', async () => {
       const res = await fetch(`${baseUrl}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'testuser', password: 'Secret456' }),
+        body: JSON.stringify({ username: 'testuser', password: randomPassword() }),
       });
 
       assert.equal(res.status, 409);
@@ -58,7 +63,7 @@ describe('Auth API', () => {
       const res = await fetch(`${baseUrl}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'newuser', password: 'short' }),
+        body: JSON.stringify({ username: 'newuser', password: weakInput }),
       });
 
       assert.equal(res.status, 400);
@@ -73,13 +78,13 @@ describe('Auth API', () => {
       await fetch(`${baseUrl}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'loginuser', password: 'Secret123' }),
+        body: JSON.stringify({ username: 'loginuser', password: loginPassword }),
       });
 
       const res = await fetch(`${baseUrl}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'loginuser', password: 'Secret123' }),
+        body: JSON.stringify({ username: 'loginuser', password: loginPassword }),
       });
 
       assert.equal(res.status, 200);
@@ -96,7 +101,7 @@ describe('Auth API', () => {
       const res = await fetch(`${baseUrl}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'loginuser', password: 'WrongPass1' }),
+        body: JSON.stringify({ username: 'loginuser', password: wrongPassword }),
       });
 
       assert.equal(res.status, 401);
