@@ -1,0 +1,61 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: npm
+      - run: npm ci
+      - run: npm run lint --workspace=backend
+
+  test-unit:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit:coverage --workspace=backend
+
+  test-integration:
+    needs: test-unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: npm
+      - run: npm ci
+      - run: npm run test:integration:coverage --workspace=backend
+
+  test-api:
+    needs: test-integration
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: npm
+      - run: npm ci
+      - run: npm run test:api:coverage --workspace=backend
