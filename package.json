@@ -1,0 +1,32 @@
+{
+  "name": "workout-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm test --workspaces --if-present",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  },
+  "lint-staged": {
+    "backend/**/*.js": [
+      "eslint --fix --no-error-on-unmatched-pattern --config backend/eslint.config.js",
+      "prettier --write"
+    ],
+    "frontend/**/*.{js,vue}": [
+      "eslint --fix --no-error-on-unmatched-pattern --config frontend/eslint.config.js",
+      "prettier --write"
+    ]
+  }
+}
