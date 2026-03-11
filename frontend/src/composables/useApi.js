@@ -27,6 +27,10 @@ async function request(method, path, body) {
     throw new Error(data.error || 'Request failed');
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 }
 

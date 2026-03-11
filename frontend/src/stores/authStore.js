@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-async function doLogin(token, { username, password }) {
+async function doLogin(token, user, { username, password }) {
   const response = await fetch('/api/users/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -15,7 +15,9 @@ async function doLogin(token, { username, password }) {
 
   const data = await response.json();
   token.value = data.token;
+  user.value = { username };
   localStorage.setItem('token', data.token);
+  localStorage.setItem('username', username);
 }
 
 async function doRegister({ username, password }) {
@@ -38,15 +40,17 @@ async function doLogout(token, user) {
   token.value = null;
   user.value = null;
   localStorage.removeItem('token');
+  localStorage.removeItem('username');
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token'));
-  const user = ref(null);
+  const savedUsername = localStorage.getItem('username');
+  const user = ref(savedUsername ? { username: savedUsername } : null);
 
   const isAuthenticated = computed(() => !!token.value);
 
-  const login = (credentials) => doLogin(token, credentials);
+  const login = (credentials) => doLogin(token, user, credentials);
   const register = (credentials) => doRegister(credentials);
   const logout = () => doLogout(token, user);
 

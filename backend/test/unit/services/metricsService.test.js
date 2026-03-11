@@ -79,7 +79,7 @@ describe('metricsService', () => {
       assert.equal(result.goalProgress, null);
     });
 
-    it('should cap goalProgress at 100%', () => {
+    it('should allow goalProgress above 100% when exceeding goal', () => {
       const workoutRepo = createMockWorkoutRepository({ countByYear: 200 });
       const goalRepo = createMockGoalRepository({
         goal: { id: 1, user_id: 1, goal: 100, year: 2025, updated_at: '2025-01-01' },
@@ -87,7 +87,7 @@ describe('metricsService', () => {
       const service = createMetricsService(workoutRepo, goalRepo);
 
       const result = service.getMetrics({ userId: 1, year: 2025 });
-      assert.equal(result.goalProgress, 100);
+      assert.equal(result.goalProgress, 200);
     });
 
     it('should throw 400 for invalid year', () => {

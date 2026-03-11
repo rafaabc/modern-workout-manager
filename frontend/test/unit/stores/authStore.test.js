@@ -16,9 +16,11 @@ describe('authStore', () => {
   describe('initialization', () => {
     it('initializes with token from localStorage if present', () => {
       localStorage.setItem('token', 'stored-token');
+      localStorage.setItem('username', 'storeduser');
       setActivePinia(createPinia());
       const store = useAuthStore();
       expect(store.token).toBe('stored-token');
+      expect(store.user).toEqual({ username: 'storeduser' });
       expect(store.isAuthenticated).toBe(true);
     });
 
@@ -54,7 +56,9 @@ describe('authStore', () => {
       await store.login({ username: 'testuser', password: pwd });
 
       expect(store.token).toBe('jwt-token-123');
+      expect(store.user).toEqual({ username: 'testuser' });
       expect(localStorage.getItem('token')).toBe('jwt-token-123');
+      expect(localStorage.getItem('username')).toBe('testuser');
       expect(store.isAuthenticated).toBe(true);
       expect(fetch).toHaveBeenCalledWith('/api/users/login', {
         method: 'POST',
@@ -119,12 +123,14 @@ describe('authStore', () => {
       store.token = 'some-token';
       store.user = { username: 'testuser' };
       localStorage.setItem('token', 'some-token');
+      localStorage.setItem('username', 'testuser');
 
       await store.logout();
 
       expect(store.token).toBeNull();
       expect(store.user).toBeNull();
       expect(localStorage.getItem('token')).toBeNull();
+      expect(localStorage.getItem('username')).toBeNull();
       expect(store.isAuthenticated).toBe(false);
     });
   });

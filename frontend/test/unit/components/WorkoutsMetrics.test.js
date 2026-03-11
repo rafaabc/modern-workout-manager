@@ -63,7 +63,7 @@ describe('WorkoutsMetrics', () => {
   it('displays no-goal message when goal is null', () => {
     store.metrics = createMockMetrics({ goal: null, goalProgress: null });
     const wrapper = mountMetrics();
-    expect(wrapper.find('.no-goal').text()).toBe('Nenhuma meta definida');
+    expect(wrapper.find('.no-goal').text()).toBe('No goal set');
   });
 
   it('renders annual progress bar reflecting goalProgress', () => {
@@ -81,12 +81,12 @@ describe('WorkoutsMetrics', () => {
     expect(wrapper.find('.annual-progress').exists()).toBe(false);
   });
 
-  it('renders monthly progress bar with correct percentage (goal=12, count=1 → 8%)', () => {
+  it('renders monthly progress bar with correct percentage (goal=120, count=5 → 50%)', () => {
     store.metrics = createMockMetrics({
-      goal: 12,
-      goalProgress: 8,
+      goal: 120,
+      goalProgress: 4,
       byMonth: [
-        { month: 1, count: 1 },
+        { month: 1, count: 5 },
         { month: 2, count: 0 },
         { month: 3, count: 0 },
         { month: 4, count: 0 },
@@ -103,11 +103,11 @@ describe('WorkoutsMetrics', () => {
     const wrapper = mountMetrics();
     const monthEntries = wrapper.findAll('.month-entry');
     const firstMonthBar = monthEntries[0].find('.month-progress .progress-fill');
-    expect(firstMonthBar.attributes('style')).toContain('width: 8%');
-    expect(monthEntries[0].find('.month-progress .progress-label').text()).toBe('8%');
+    expect(firstMonthBar.attributes('style')).toContain('width: 50%');
+    expect(monthEntries[0].find('.progress-label').text()).toBe('50%');
   });
 
-  it('caps monthly progress bar at 100% (goal=1, count=3 → 100%)', () => {
+  it('shows overflow on monthly progress bar beyond 100% (goal=1, count=3 → 3600%)', () => {
     store.metrics = createMockMetrics({
       goal: 1,
       goalProgress: 100,
@@ -128,9 +128,10 @@ describe('WorkoutsMetrics', () => {
     });
     const wrapper = mountMetrics();
     const monthEntries = wrapper.findAll('.month-entry');
-    const firstMonthBar = monthEntries[0].find('.month-progress .progress-fill');
-    expect(firstMonthBar.attributes('style')).toContain('width: 100%');
-    expect(monthEntries[0].find('.month-progress .progress-label').text()).toBe('100%');
+    const baseFill = monthEntries[0].find('.month-progress .progress-fill');
+    expect(baseFill.attributes('style')).toContain('width: 100%');
+    expect(monthEntries[0].find('.overflow-fill').exists()).toBe(true);
+    expect(monthEntries[0].find('.progress-label').text()).toBe('3600%');
   });
 
   it('does not render monthly progress bars when goal is null', () => {
@@ -160,10 +161,10 @@ describe('WorkoutsMetrics', () => {
     const monthEntries = wrapper.findAll('.month-entry');
     expect(monthEntries).toHaveLength(12);
 
-    expect(monthEntries[0].find('.month-name').text()).toBe('Janeiro');
+    expect(monthEntries[0].find('.month-name').text()).toBe('January');
     expect(monthEntries[0].find('.month-count').text()).toBe('5');
 
-    expect(monthEntries[11].find('.month-name').text()).toBe('Dezembro');
+    expect(monthEntries[11].find('.month-name').text()).toBe('December');
     expect(monthEntries[11].find('.month-count').text()).toBe('1');
   });
 
@@ -184,12 +185,12 @@ describe('WorkoutsMetrics', () => {
     // Wait for async handler
     await vi.dynamicImportSettled();
 
-    expect(wrapper.find('.success-message').text()).toBe('Meta salva com sucesso');
+    expect(wrapper.find('.success-message').text()).toBe('Goal saved successfully');
   });
 
   it('shows error message after failed goal save', async () => {
     store.metrics = createMockMetrics();
-    vi.spyOn(store, 'setGoal').mockRejectedValue(new Error('Falha ao salvar'));
+    vi.spyOn(store, 'setGoal').mockRejectedValue(new Error('Failed to save'));
 
     const wrapper = mountMetrics();
     await wrapper.find('.goal-input').setValue(50);
@@ -198,6 +199,6 @@ describe('WorkoutsMetrics', () => {
     // Wait for async handler
     await vi.dynamicImportSettled();
 
-    expect(wrapper.find('.error-message').text()).toBe('Falha ao salvar');
+    expect(wrapper.find('.error-message').text()).toBe('Failed to save');
   });
 });

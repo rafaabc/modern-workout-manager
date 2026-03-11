@@ -102,7 +102,7 @@ describe('WorkoutCalendar', () => {
     store.currentMonth = 1;
     store.currentYear = 2025;
     const wrapper = mountCalendar();
-    expect(wrapper.find('h2').text()).toBe('Janeiro 2025');
+    expect(wrapper.find('h2').text()).toBe('January 2025');
   });
 
   it('shows loading indicator when loading is true', () => {

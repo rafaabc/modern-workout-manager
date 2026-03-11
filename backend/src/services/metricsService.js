@@ -22,7 +22,7 @@ export function createMetricsService(workoutRepository, goalRepository) {
 
       if (goalRow && goalRow.year === year) {
         goal = goalRow.goal;
-        goalProgress = Math.min(Math.round((totalYear / goal) * 100), 100);
+        goalProgress = Math.round((totalYear / goal) * 100);
       }
 
       return { totalYear, goal, goalProgress, byMonth };
