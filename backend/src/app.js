@@ -13,6 +13,10 @@ import { createWorkoutRepository } from './repositories/workoutRepository.js';
 import { createWorkoutService } from './services/workoutService.js';
 import { createWorkoutController } from './controllers/workoutController.js';
 import { createWorkoutRoutes } from './routes/workoutRoutes.js';
+import { createGoalRepository } from './repositories/goalRepository.js';
+import { createMetricsService } from './services/metricsService.js';
+import { createMetricsController } from './controllers/metricsController.js';
+import { createMetricsRoutes } from './routes/metricsRoutes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -29,6 +33,11 @@ export function createApp(dbPath) {
   const workoutController = createWorkoutController(workoutService);
   const workoutRoutes = createWorkoutRoutes(workoutController);
 
+  const goalRepository = createGoalRepository(db);
+  const metricsService = createMetricsService(workoutRepository, goalRepository);
+  const metricsController = createMetricsController(metricsService);
+  const metricsRoutes = createMetricsRoutes(metricsController);
+
   const app = express();
 
   app.use(cors());
@@ -40,6 +49,7 @@ export function createApp(dbPath) {
 
   app.use('/api/users', userRoutes);
   app.use('/api/workouts', workoutRoutes);
+  app.use('/api/metrics', metricsRoutes);
 
   app.db = db;
 

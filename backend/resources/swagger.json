@@ -256,6 +256,89 @@
           }
         }
       }
+    },
+    "/api/metrics": {
+      "get": {
+        "tags": ["Metrics"],
+        "summary": "Get workout metrics for a year",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 },
+            "example": 2025
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metrics for the year",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MetricsResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/metrics/goal": {
+      "post": {
+        "tags": ["Metrics"],
+        "summary": "Set annual workout goal",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GoalRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Goal set successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GoalResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -378,6 +461,85 @@
           "year": {
             "type": "integer",
             "example": 2025
+          }
+        }
+      },
+      "GoalRequest": {
+        "type": "object",
+        "required": ["goal", "year"],
+        "properties": {
+          "goal": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 150
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 2025
+          }
+        }
+      },
+      "GoalResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "goal": {
+            "type": "integer",
+            "example": 150
+          },
+          "year": {
+            "type": "integer",
+            "example": 2025
+          },
+          "updated_at": {
+            "type": "string",
+            "example": "2025-01-15 10:30:00"
+          }
+        }
+      },
+      "MetricsResponse": {
+        "type": "object",
+        "properties": {
+          "totalYear": {
+            "type": "integer",
+            "example": 42
+          },
+          "goal": {
+            "type": "integer",
+            "nullable": true,
+            "example": 150
+          },
+          "goalProgress": {
+            "type": "integer",
+            "nullable": true,
+            "example": 28
+          },
+          "byMonth": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthCount"
+            }
+          }
+        }
+      },
+      "MonthCount": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "example": 1
+          },
+          "count": {
+            "type": "integer",
+            "example": 5
           }
         }
       }
