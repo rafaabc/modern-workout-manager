@@ -11,6 +11,9 @@ export function createWorkoutRepository(db) {
   const countByYearStmt = db.prepare(
     'SELECT COUNT(*) as count FROM workouts WHERE user_id = @userId AND year = @year',
   );
+  const countByYearGroupedStmt = db.prepare(
+    'SELECT month, COUNT(*) as count FROM workouts WHERE user_id = @userId AND year = @year GROUP BY month',
+  );
 
   return {
     findByMonth({ userId, month, year }) {
@@ -30,6 +33,10 @@ export function createWorkoutRepository(db) {
     countByYear({ userId, year }) {
       const row = countByYearStmt.get({ userId, year });
       return row.count;
+    },
+
+    countByYearGrouped({ userId, year }) {
+      return countByYearGroupedStmt.all({ userId, year });
     },
   };
 }

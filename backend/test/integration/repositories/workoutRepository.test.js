@@ -90,4 +90,19 @@ describe('workoutRepository', () => {
       assert.equal(count, 2);
     });
   });
+
+  describe('countByYearGrouped', () => {
+    it('should return count grouped by month', () => {
+      workoutRepository.create({ userId, day: 1, month: 1, year: 2025 });
+      workoutRepository.create({ userId, day: 5, month: 1, year: 2025 });
+      workoutRepository.create({ userId, day: 10, month: 3, year: 2025 });
+
+      const grouped = workoutRepository.countByYearGrouped({ userId, year: 2025 });
+      assert.equal(grouped.length, 2);
+      assert.equal(grouped[0].month, 1);
+      assert.equal(grouped[0].count, 2);
+      assert.equal(grouped[1].month, 3);
+      assert.equal(grouped[1].count, 1);
+    });
+  });
 });
