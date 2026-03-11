@@ -20,15 +20,15 @@ function verifyPassword(password, stored) {
   return timingSafeEqual(hashBuffer, candidateBuffer);
 }
 
-export function createUserService(userRepository) {
-  function getJwtSecret() {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error('JWT_SECRET environment variable is not defined');
-    }
-    return secret;
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not defined');
   }
+  return secret;
+}
 
+export function createUserService(userRepository) {
   return {
     register({ username, password }) {
       const usernameValidation = validateUsername(username);
