@@ -94,4 +94,13 @@ describe('LoginPage', () => {
     const link = wrapper.find('a[href="/register"]');
     expect(link.exists()).toBe(true);
   });
+
+  it('shows a success message when arriving from completed registration', async () => {
+    await router.push({ path: '/login', query: { registered: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+
+    expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
+  });
 });
