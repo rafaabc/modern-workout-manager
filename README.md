@@ -3,6 +3,7 @@
 ![Backend CI](https://github.com/rafaabc/modern-workout-manager/actions/workflows/backend.yml/badge.svg)
 ![Frontend CI](https://github.com/rafaabc/modern-workout-manager/actions/workflows/frontend.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rafaabc_modern-workout-manager&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rafaabc_modern-workout-manager)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Description
 
@@ -208,3 +209,78 @@ Full interactive documentation available at `http://localhost:3000/api-docs` (Sw
 - Progress is calculated as a percentage of workouts completed versus the goal
 - Metrics show the total workouts for the year and a monthly breakdown
 - Goal information is only displayed when viewing the same year the goal was set for
+
+## Quick start
+
+**Development (local, separate servers)**
+
+- Backend: you can use the root `.env` or copy it into `backend/.env`. From the repo root:
+
+```bash
+# install backend deps and start
+cd backend
+npm install
+# copy env (Unix/macOS)
+cp ../.env .env
+# on Windows PowerShell: Copy-Item ..\\.env .env
+npm start
+```
+
+- Frontend (Vite dev server):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend dev is usually at `http://localhost:5173`; backend is at `http://localhost:3000` (Swagger at `/api-docs`).
+
+**Production image (Docker Compose)**
+
+- Ensure the root `.env` contains a non-empty `JWT_SECRET` and a `DATABASE_PATH` (recommended: `database/workout-manager.db`). Avoid setting `NODE_ENV` in the root `.env` if you want Docker Compose to control it.
+
+```bash
+docker compose up --build
+# or run detached
+docker compose up --build -d
+docker compose logs -f backend
+```
+
+- The compose file mounts a named volume `db-data:/app/database` so the SQLite file persists between restarts. In the production image the backend will serve the built frontend at `http://localhost:3000/`.
+
+**Notes**
+
+- `DATABASE_PATH` is used as provided; relative paths are resolved against the process working directory (`/app` in the container).
+- `docker-compose.yml` sets `NODE_ENV=production` for the `backend` service so the app serves `frontend/dist` when running the compose image.
+- Keep `JWT_SECRET` secret — do not commit changed secrets to the repository.
+
+ 
+
+## NPM scripts (root and workspaces)
+
+The repository provides convenience scripts at the workspace root and concrete scripts inside each package.
+
+        - `npm run start:backend` — runs the backend start script (`backend` workspace).
+        - `npm run start:frontend` — runs the frontend dev server (`frontend` workspace).
+        - `npm run docker:up` / `npm run docker:down` / `npm run docker:logs` — Docker Compose helpers.
+        - `npm run test:backend` — runs backend tests (unit, integration, API).
+        - `npm run test:frontend` — runs frontend unit tests.
+        - `npm run test` — runs `test:backend` then `test:frontend` sequentially.
+
+        - `npm start` — starts the backend using `backend/.env` (the script passes `--env-file=.env`).
+        - `npm run lint` / `npm run lint:fix` — ESLint commands for backend sources.
+        - `npm run test:unit`, `test:integration`, `test:api` — backend tests.
+
+        - `npm run dev` — vite dev server.
+        - `npm run build` — build production frontend into `dist`.
+        - `npm run lint` / `npm run lint:fix` — ESLint commands for frontend sources.
+        - `npm run test:unit` — frontend unit tests (Vitest).
+
+Notes:
+
+## License
+
+This project is licensed under the MIT License — see the `LICENSE` file for details.
+
+

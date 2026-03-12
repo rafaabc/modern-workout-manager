@@ -7,12 +7,20 @@
     "backend",
     "frontend"
   ],
+  "license": "MIT",
   "scripts": {
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm test --workspaces --if-present",
-    "prepare": "husky"
+    "test:backend": "npm --workspace=backend run test:unit && npm --workspace=backend run test:integration && npm --workspace=backend run test:api",
+    "test:frontend": "npm --workspace=frontend run test:unit",
+    "test": "npm run test:backend && npm run test:frontend",
+    "prepare": "husky",
+    "start:backend": "npm --workspace=backend run start",
+    "start:frontend": "npm --workspace=frontend run dev",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f backend"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
