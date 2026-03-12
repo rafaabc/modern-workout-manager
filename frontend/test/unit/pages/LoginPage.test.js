@@ -112,4 +112,70 @@ describe('LoginPage', () => {
 
     expect(wrapper.text()).toContain('Logged out successfully');
   });
+
+  it('registration message can be dismissed with close button', async () => {
+    await router.push({ path: '/login', query: { registered: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
+
+    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de registro"]');
+    expect(closeBtn.exists()).toBe(true);
+    await closeBtn.trigger('click');
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain(
+      'Registration completed successfully. You can now sign in.',
+    );
+  });
+
+  it('registration message is removed after timeout and query param cleared', async () => {
+    vi.useFakeTimers();
+    await router.push({ path: '/login', query: { registered: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
+
+    vi.advanceTimersByTime(3000);
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain(
+      'Registration completed successfully. You can now sign in.',
+    );
+    expect(router.currentRoute.value.query.registered).toBeUndefined();
+    vi.useRealTimers();
+  });
+
+  it('logout message can be dismissed with close button', async () => {
+    await router.push({ path: '/login', query: { loggedOut: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    expect(wrapper.text()).toContain('Logged out successfully');
+
+    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de logout"]');
+    expect(closeBtn.exists()).toBe(true);
+    await closeBtn.trigger('click');
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain('Logged out successfully');
+  });
+
+  it('logout message is removed after timeout and query param cleared', async () => {
+    vi.useFakeTimers();
+    await router.push({ path: '/login', query: { loggedOut: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    expect(wrapper.text()).toContain('Logged out successfully');
+
+    vi.advanceTimersByTime(3000);
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain('Logged out successfully');
+    expect(router.currentRoute.value.query.loggedOut).toBeUndefined();
+    vi.useRealTimers();
+  });
 });
