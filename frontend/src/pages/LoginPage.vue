@@ -1,7 +1,7 @@
 <template>
   <div class="login-page min-h-screen bg-gray-950 flex items-center justify-center px-4">
     <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-8 w-full max-w-md">
-      <h1 class="text-2xl font-bold text-white mb-6 text-center">Login</h1>
+      <h1 class="text-2xl font-bold text-white mb-6 text-center">{{ t('auth.login') }}</h1>
       <Transition
         enter-active-class="transition duration-300 ease-out"
         enter-from-class="opacity-0 -translate-y-2"
@@ -14,14 +14,14 @@
           v-if="showRegisteredMessage"
           class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200"
         >
-          Registration completed successfully. You can now sign in.
+          {{ t('login.registerSuccess') }}
         </div>
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-300 mb-1"
-            >Username</label
-          >
+          <label for="username" class="block text-sm font-medium text-gray-300 mb-1">{{
+            t('fields.username')
+          }}</label>
           <input
             id="username"
             v-model="username"
@@ -31,9 +31,9 @@
           />
         </div>
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-300 mb-1"
-            >Password</label
-          >
+          <label for="password" class="block text-sm font-medium text-gray-300 mb-1">{{
+            t('fields.secret')
+          }}</label>
           <input
             id="password"
             v-model="password"
@@ -47,14 +47,14 @@
           type="submit"
           class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg"
         >
-          Login
+          {{ t('auth.login') }}
         </button>
       </form>
       <p class="mt-4 text-center text-gray-400 text-sm">
-        Don't have an account?
-        <router-link to="/register" class="text-indigo-400 hover:text-indigo-300 transition"
-          >Register</router-link
-        >
+        {{ t('login.noAccount') }}
+        <router-link to="/register" class="text-indigo-400 hover:text-indigo-300 transition">{{
+          t('auth.register')
+        }}</router-link>
       </p>
     </div>
   </div>
@@ -64,6 +64,7 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
+import { useI18n } from '../composables/useI18n.js';
 
 const username = ref('');
 const password = ref('');
@@ -71,6 +72,7 @@ const error = ref('');
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { localizeError, t } = useI18n();
 const showRegisteredMessage = computed(() => route.query.registered === '1');
 
 async function handleSubmit() {
@@ -79,7 +81,7 @@ async function handleSubmit() {
     await authStore.login({ username: username.value, password: password.value });
     router.push('/');
   } catch (err) {
-    error.value = err.message;
+    error.value = localizeError(err.message);
   }
 }
 </script>

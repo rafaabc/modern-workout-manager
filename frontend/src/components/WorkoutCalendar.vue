@@ -7,7 +7,9 @@
       >
         ←
       </button>
-      <h2 class="text-lg font-bold text-white">{{ monthName }} {{ calendarStore.currentYear }}</h2>
+      <h2 class="text-lg font-bold text-white">
+        {{ currentMonthName }} {{ calendarStore.currentYear }}
+      </h2>
       <button
         class="next-month text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-lg p-2 transition"
         @click="calendarStore.nextMonth()"
@@ -70,28 +72,15 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCalendarStore } from '../stores/calendarStore.js';
+import { useI18n } from '../composables/useI18n.js';
 
 const calendarStore = useCalendarStore();
 const { workoutDays } = storeToRefs(calendarStore);
+const { monthName, shortWeekDays } = useI18n();
 
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+const currentMonthName = computed(() => monthName(calendarStore.currentMonth));
 
-const monthName = computed(() => monthNames[calendarStore.currentMonth - 1]);
-
-const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const weekDays = computed(() => shortWeekDays());
 
 const startOffset = computed(() => {
   return new Date(calendarStore.currentYear, calendarStore.currentMonth - 1, 1).getDay();
