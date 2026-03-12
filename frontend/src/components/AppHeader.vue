@@ -2,11 +2,11 @@
   <header class="app-header bg-gray-900 border-b border-gray-700 shadow-lg">
     <div class="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
       <span
-        class="app-name bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent font-bold text-xl"
+        class="app-name bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent font-bold text-xl"
         >{{ t('appName') }}</span
       >
       <div class="flex items-center gap-4">
-        <div
+        <section
           class="language-picker flex items-center gap-1 rounded-lg border border-gray-700 bg-gray-800 p-1"
           :aria-label="t('language.selectorLabel')"
         >
@@ -17,7 +17,7 @@
             class="locale-option rounded-md px-2 py-1 text-xs font-medium transition"
             :class="
               currentLocale === option.code
-                ? 'bg-indigo-500 text-white'
+                ? 'bg-indigo-700 text-white ring-2 ring-indigo-300'
                 : 'text-gray-300 hover:bg-gray-700 hover:text-white'
             "
             @click="setLocale(option.code)"
@@ -25,7 +25,7 @@
             <span class="mr-1" aria-hidden="true">{{ option.flag }}</span>
             {{ t(option.labelKey) }}
           </button>
-        </div>
+        </section>
         <nav
           v-if="authStore.isAuthenticated"
           aria-label="User menu"
