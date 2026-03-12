@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createMemoryHistory } from 'vue-router';
@@ -31,6 +31,12 @@ describe('RegisterPage', () => {
     await router.isReady();
     localStorage.clear();
     vi.restoreAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   function mountRegisterPage() {
@@ -112,7 +118,7 @@ describe('RegisterPage', () => {
     expect(wrapper.find('.error').text()).toBe('Username already exists');
   });
 
-  it('redirects to /login after successful registration', async () => {
+  it('shows success feedback before redirecting to /login after successful registration', async () => {
     const wrapper = mountRegisterPage();
     const authStore = useAuthStore();
     vi.spyOn(authStore, 'register').mockResolvedValue({ id: 1, username: 'newuser' });
@@ -122,7 +128,32 @@ describe('RegisterPage', () => {
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
+    expect(wrapper.find('.success').text()).toContain('Registration successful.');
+    expect(wrapper.find('button').text()).toBe('Redirecting...');
+    expect(wrapper.find('button').attributes('disabled')).toBeDefined();
+    expect(router.currentRoute.value.path).toBe('/register');
+
+    vi.advanceTimersByTime(1400);
+    await flushPromises();
+
     expect(router.currentRoute.value.path).toBe('/login');
+    expect(router.currentRoute.value.query.registered).toBe('1');
+  });
+
+  it('clears the pending redirect timer when the page is unmounted', async () => {
+    const wrapper = mountRegisterPage();
+    const authStore = useAuthStore();
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+    vi.spyOn(authStore, 'register').mockResolvedValue({ id: 1, username: 'newuser' });
+
+    await wrapper.find('#username').setValue('newuser');
+    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    wrapper.unmount();
+
+    expect(clearTimeoutSpy).toHaveBeenCalled();
   });
 
   it('has a link to /login', () => {

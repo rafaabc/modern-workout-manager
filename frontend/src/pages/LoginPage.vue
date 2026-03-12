@@ -2,6 +2,21 @@
   <div class="login-page min-h-screen bg-gray-950 flex items-center justify-center px-4">
     <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <h1 class="text-2xl font-bold text-white mb-6 text-center">Login</h1>
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div
+          v-if="showRegisteredMessage"
+          class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200"
+        >
+          Registration completed successfully. You can now sign in.
+        </div>
+      </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
           <label for="username" class="block text-sm font-medium text-gray-300 mb-1"
@@ -46,15 +61,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
 
 const username = ref('');
 const password = ref('');
 const error = ref('');
+const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const showRegisteredMessage = computed(() => route.query.registered === '1');
 
 async function handleSubmit() {
   error.value = '';
