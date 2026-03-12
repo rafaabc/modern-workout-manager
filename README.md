@@ -255,6 +255,12 @@ docker compose logs -f backend
 - `docker-compose.yml` sets `NODE_ENV=production` for the `backend` service so the app serves `frontend/dist` when running the compose image.
 - Keep `JWT_SECRET` secret — do not commit changed secrets to the repository.
 
+### Deploy notes for Render
+
+- The app writes a SQLite file to the path specified by `DATABASE_PATH`. Some PaaS providers (including Render) do not create arbitrary directories by default, which causes the process to fail when the parent directory for the DB file is missing. The application now auto-creates the parent directory, which prevents the crash shown in your logs.
+- For production on Render prefer a persistent disk path (or an external DB). On Render you can attach a Persistent Disk and use an absolute path such as `/data/workout-manager.db` and set `DATABASE_PATH=/data/workout-manager.db` in the Render service environment.
+
+
  
 
 ## NPM scripts (root and workspaces)
