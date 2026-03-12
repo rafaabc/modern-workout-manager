@@ -1,6 +1,6 @@
 <template>
   <div class="workouts-metrics bg-gray-800 border border-gray-700 rounded-2xl shadow-xl p-6">
-    <h2 class="text-lg font-bold text-white mb-6">Workout Metrics</h2>
+    <h2 class="text-lg font-bold text-white mb-6">{{ t('metrics.title') }}</h2>
 
     <div v-if="loading && !metrics" class="loading flex justify-center py-8">
       <svg
@@ -27,9 +27,9 @@
 
     <template v-else-if="metrics">
       <form class="goal-form border-b border-gray-700 mb-6 pb-4" @submit.prevent="handleSetGoal">
-        <label for="goal-input" class="text-gray-300 text-sm font-medium mb-2 block"
-          >Set annual goal</label
-        >
+        <label for="goal-input" class="text-gray-300 text-sm font-medium mb-2 block">{{
+          t('metrics.setAnnualGoal')
+        }}</label>
         <div class="flex gap-2">
           <input
             id="goal-input"
@@ -37,13 +37,13 @@
             type="number"
             min="1"
             class="goal-input flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Annual goal"
+            :placeholder="t('metrics.annualGoalPlaceholder')"
           />
           <button
             type="submit"
             class="save-goal bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
           >
-            Save goal
+            {{ t('metrics.saveGoal') }}
           </button>
         </div>
         <span v-if="successMessage" class="success-message text-green-400 text-xs mt-2 block">{{
@@ -55,17 +55,17 @@
       </form>
 
       <div class="total-year mb-4">
-        <span class="text-gray-400 text-sm">Total this year</span>
+        <span class="text-gray-400 text-sm">{{ t('metrics.totalThisYear') }}</span>
         <div>
           <strong class="text-4xl font-bold text-white">{{ metrics.totalYear }}</strong>
         </div>
       </div>
 
       <div class="goal-section mb-4">
-        <span v-if="metrics.goal !== null" class="text-gray-300 text-sm"
-          >Annual goal: {{ metrics.goal }}</span
-        >
-        <span v-else class="no-goal text-gray-400 text-sm">No goal set</span>
+        <span v-if="metrics.goal !== null" class="text-gray-300 text-sm">{{
+          t('metrics.annualGoal', { goal: metrics.goal })
+        }}</span>
+        <span v-else class="no-goal text-gray-400 text-sm">{{ t('metrics.noGoalSet') }}</span>
       </div>
 
       <div v-if="metrics.goalProgress !== null" class="annual-progress mb-6">
@@ -93,9 +93,7 @@
           :key="entry.month"
           class="month-entry flex items-center gap-3 py-2 border-b border-gray-700 last:border-0"
         >
-          <span class="month-name text-gray-300 text-sm w-24">{{
-            monthNames[entry.month - 1]
-          }}</span>
+          <span class="month-name text-gray-300 text-sm w-24">{{ monthName(entry.month) }}</span>
           <span class="month-count text-white font-medium text-sm w-6 text-right">{{
             entry.count
           }}</span>
@@ -131,28 +129,15 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useMetricsStore } from '../stores/metricsStore.js';
+import { useI18n } from '../composables/useI18n.js';
 
 const metricsStore = useMetricsStore();
 const { metrics, loading } = storeToRefs(metricsStore);
+const { localizeError, monthName, t } = useI18n();
 
 const goalInput = ref(null);
 const successMessage = ref('');
 const errorMessage = ref('');
-
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
 function monthProgress(count) {
   if (metrics.value?.goal == null) return 0;
@@ -167,12 +152,12 @@ async function handleSetGoal() {
   try {
     const year = new Date().getFullYear();
     await metricsStore.setGoal({ goal: goalInput.value, year });
-    successMessage.value = 'Goal saved successfully';
+    successMessage.value = t('metrics.goalSaved');
     setTimeout(() => {
       successMessage.value = '';
     }, 3000);
   } catch (err) {
-    errorMessage.value = err.message || 'Failed to save goal';
+    errorMessage.value = localizeError(err.message) || t('metrics.goalSaveFailed');
     setTimeout(() => {
       errorMessage.value = '';
     }, 3000);
