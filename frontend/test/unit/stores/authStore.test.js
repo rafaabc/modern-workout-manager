@@ -29,6 +29,23 @@ describe('authStore', () => {
       expect(store.token).toBeNull();
       expect(store.isAuthenticated).toBe(false);
     });
+
+    it('clears stale session when inactivity timeout has been exceeded', () => {
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_800_000);
+      localStorage.setItem('token', 'stale-token');
+      localStorage.setItem('username', 'staleuser');
+      localStorage.setItem('lastActivityAt', '0');
+
+      setActivePinia(createPinia());
+      const store = useAuthStore();
+
+      expect(store.token).toBeNull();
+      expect(store.user).toBeNull();
+      expect(localStorage.getItem('token')).toBeNull();
+      expect(localStorage.getItem('username')).toBeNull();
+      expect(localStorage.getItem('lastActivityAt')).toBeNull();
+      nowSpy.mockRestore();
+    });
   });
 
   describe('isAuthenticated', () => {
@@ -47,6 +64,7 @@ describe('authStore', () => {
 
   describe('login', () => {
     it('saves token in state and localStorage on success', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ token: 'jwt-token-123' }),
@@ -59,6 +77,7 @@ describe('authStore', () => {
       expect(store.user).toEqual({ username: 'testuser' });
       expect(localStorage.getItem('token')).toBe('jwt-token-123');
       expect(localStorage.getItem('username')).toBe('testuser');
+      expect(localStorage.getItem('lastActivityAt')).toBe('1000');
       expect(store.isAuthenticated).toBe(true);
       expect(fetch).toHaveBeenCalledWith('/api/users/login', {
         method: 'POST',
@@ -124,6 +143,7 @@ describe('authStore', () => {
       store.user = { username: 'testuser' };
       localStorage.setItem('token', 'some-token');
       localStorage.setItem('username', 'testuser');
+      localStorage.setItem('lastActivityAt', '1000');
 
       await store.logout();
 
@@ -131,7 +151,21 @@ describe('authStore', () => {
       expect(store.user).toBeNull();
       expect(localStorage.getItem('token')).toBeNull();
       expect(localStorage.getItem('username')).toBeNull();
+      expect(localStorage.getItem('lastActivityAt')).toBeNull();
       expect(store.isAuthenticated).toBe(false);
+    });
+  });
+
+  describe('activity helpers', () => {
+    it('updates last activity and calculates idle time', () => {
+      const store = useAuthStore();
+
+      store.touchActivity(2000);
+
+      expect(localStorage.getItem('lastActivityAt')).toBe('2000');
+      expect(store.getIdleMs(2600)).toBe(600);
+      expect(store.isInactiveSessionExpired(500, 2600)).toBe(true);
+      expect(store.isInactiveSessionExpired(1000, 2600)).toBe(false);
     });
   });
 });
