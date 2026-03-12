@@ -11,11 +11,13 @@ describe('workoutRepository', () => {
   let userRepository;
   let userId;
 
+  let testPassword;
   beforeEach(() => {
     db = createTestDatabase();
     userRepository = createUserRepository(db);
     workoutRepository = createWorkoutRepository(db);
-    const user = userRepository.create({ username: 'john', password: randomHash() });
+    testPassword = randomHash();
+    const user = userRepository.create({ username: 'john', password: testPassword });
     userId = Number(user.id);
   });
 
@@ -53,7 +55,8 @@ describe('workoutRepository', () => {
     });
 
     it('should not return workouts from another user', () => {
-      const userB = userRepository.create({ username: 'jane', password: randomHash() });
+      const testPasswordB = randomHash();
+      const userB = userRepository.create({ username: 'jane', password: testPasswordB });
       const userBId = Number(userB.id);
       workoutRepository.create({ userId, day: 5, month: 1, year: 2025 });
       workoutRepository.create({ userId: userBId, day: 10, month: 1, year: 2025 });
