@@ -10,11 +10,13 @@ describe('goalRepository', () => {
   let goalRepository;
   let userId;
 
+  let testPassword;
   beforeEach(() => {
     db = createTestDatabase();
     const userRepository = createUserRepository(db);
     goalRepository = createGoalRepository(db);
-    const user = userRepository.create({ username: 'john', password: randomHash() });
+    testPassword = randomHash();
+    const user = userRepository.create({ username: 'john', password: testPassword });
     userId = Number(user.id);
   });
 
