@@ -103,4 +103,13 @@ describe('LoginPage', () => {
 
     expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
   });
+
+  it('shows a logout message when arriving from logout redirect', async () => {
+    await router.push({ path: '/login', query: { loggedOut: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+
+    expect(wrapper.text()).toContain('Logged out successfully');
+  });
 });

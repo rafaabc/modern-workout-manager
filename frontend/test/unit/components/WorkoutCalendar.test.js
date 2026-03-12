@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import WorkoutCalendar from '../../../src/components/WorkoutCalendar.vue';
 import { useCalendarStore } from '../../../src/stores/calendarStore.js';
+import { useI18n } from '../../../src/composables/useI18n.js';
 
 vi.mock('../../../src/composables/useApi.js', () => ({
   useApi: () => ({ request: vi.fn().mockResolvedValue([]) }),
@@ -103,6 +104,17 @@ describe('WorkoutCalendar', () => {
     store.currentYear = 2025;
     const wrapper = mountCalendar();
     expect(wrapper.find('h2').text()).toBe('January 2025');
+  });
+
+  it('displays month and year capitalized in pt-BR', () => {
+    // set locale to Portuguese (Brazil) via composable
+    const { setLocale } = useI18n();
+    setLocale('pt-BR');
+    store.currentMonth = 3;
+    store.currentYear = 2026;
+    const wrapper = mountCalendar();
+    expect(wrapper.find('h2').text()).toBe('Março 2026');
+    setLocale('en-GB');
   });
 
   it('shows loading indicator when loading is true', () => {

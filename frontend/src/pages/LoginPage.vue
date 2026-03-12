@@ -10,11 +10,19 @@
         leave-from-class="opacity-100 translate-y-0"
         leave-to-class="opacity-0 -translate-y-2"
       >
-        <div
-          v-if="showRegisteredMessage"
-          class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200"
-        >
-          {{ t('login.registerSuccess') }}
+        <div v-if="showRegisteredMessage || showLoggedOutMessage">
+          <div
+            v-if="showRegisteredMessage"
+            class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200"
+          >
+            {{ t('login.registerSuccess') }}
+          </div>
+          <div
+            v-if="showLoggedOutMessage"
+            class="mb-4 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-4 py-3 text-center text-sm text-indigo-200"
+          >
+            {{ t('auth.loggedOut') }}
+          </div>
         </div>
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -74,6 +82,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const { localizeError, t } = useI18n();
 const showRegisteredMessage = computed(() => route.query.registered === '1');
+const showLoggedOutMessage = computed(() => route.query.loggedOut === '1');
 
 async function handleSubmit() {
   error.value = '';

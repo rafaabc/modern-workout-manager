@@ -14,6 +14,7 @@ const translations = {
       login: 'Login',
       register: 'Register',
       logout: 'Logout',
+      loggedOut: 'Logged out successfully',
     },
     dashboard: {
       title: 'Dashboard',
@@ -56,72 +57,89 @@ const translations = {
       englishUk: 'British English',
       portugueseBr: 'Portuguese (Brazil)',
     },
+    aria: {
+      userMenu: 'User menu',
+      authentication: 'Authentication',
+    },
   },
   'pt-BR': {
     appName: 'Workout Manager',
-    userFallback: 'Usuario',
+    userFallback: 'Usuário',
     auth: {
       login: 'Entrar',
       register: 'Cadastrar',
       logout: 'Sair',
+      loggedOut: 'Desconectado com sucesso',
     },
     dashboard: {
       title: 'Painel',
     },
     fields: {
-      username: 'Usuario',
+      username: 'Usuário',
       secret: PT_PASS_LABEL,
     },
     login: {
-      registerSuccess: 'Cadastro concluido com sucesso. Agora voce pode entrar.',
-      noAccount: 'Nao tem uma conta?',
+      registerSuccess: 'Cadastro realizado com sucesso. Você já pode entrar.',
+      noAccount: 'Não tem uma conta?',
     },
     register: {
-      title: 'Cadastro',
-      haveAccount: 'Ja tem uma conta?',
+      title: 'Cadastrar',
+      haveAccount: 'Já tem uma conta?',
       redirecting: 'Redirecionando...',
       creatingAccount: 'Criando conta...',
       submit: 'Cadastrar',
       successTitle: 'Cadastro realizado com sucesso.',
-      successRedirect: 'Sua conta esta pronta. Redirecionando para login...',
+      successRedirect: 'Sua conta está pronta. Redirecionando para o login...',
     },
     validation: {
-      usernameMin: 'Usuario deve ter pelo menos 3 caracteres',
+      usernameMin: 'Usuário deve ter pelo menos 3 caracteres',
       secretMin: `${PT_PASS_LABEL} deve ter pelo menos 8 caracteres`,
-      secretLettersNumbers: `${PT_PASS_LABEL} deve conter letras e numeros`,
+      secretLettersNumbers: `${PT_PASS_LABEL} deve conter letras e números`,
     },
     metrics: {
-      title: 'Metricas de Treino',
+      title: 'Métricas de treino',
       setAnnualGoal: 'Definir meta anual',
       annualGoalPlaceholder: 'Meta anual',
       saveGoal: 'Salvar meta',
       goalSaved: 'Meta salva com sucesso',
       goalSaveFailed: 'Falha ao salvar meta',
-      totalThisYear: 'Total no ano',
+      totalThisYear: 'Total este ano',
       annualGoal: 'Meta anual: {goal}',
       noGoalSet: 'Nenhuma meta definida',
     },
     language: {
       selectorLabel: 'Seletor de idioma',
-      englishUk: 'Ingles britanico',
-      portugueseBr: 'Portugues (Brasil)',
+      englishUk: 'Inglês (Reino Unido)',
+      portugueseBr: 'Português (Brasil)',
+    },
+    aria: {
+      userMenu: 'Menu do usuário',
+      authentication: 'Autenticação',
     },
   },
 };
 
 const localizedErrorMessages = {
   'pt-BR': {
-    'Invalid credentials': 'Credenciais invalidas',
-    'Login failed': 'Falha ao fazer login',
-    'Registration failed': 'Falha ao cadastrar',
-    'Username already exists': 'Nome de usuario ja existe',
-    Unauthorized: 'Nao autorizado',
-    'Request failed': 'Falha na requisicao',
+    'Invalid credentials': 'Credenciais inválidas',
+    'Login failed': 'Falha ao efetuar login',
+    'Registration failed': 'Falha no cadastro',
+    'Username already exists': 'Nome de usuário já existe',
+    Unauthorized: 'Não autorizado',
+    'Request failed': 'Falha na requisição',
     'Failed to save goal': 'Falha ao salvar meta',
     'Goal must be at least 1': 'A meta deve ser pelo menos 1',
-    'Username must be at least 3 characters': 'Usuario deve ter pelo menos 3 caracteres',
+    'Username must be at least 3 characters': 'Usuário deve ter pelo menos 3 caracteres',
+    'Username is required': 'Nome de usuário é obrigatório',
+    'Username must be at least 3 characters long':
+      'Nome de usuário deve ter pelo menos 3 caracteres',
+    [`${EN_PASS_LABEL} is required`]: 'Senha é obrigatória',
+    [`${EN_PASS_LABEL} must be at least 8 characters long`]:
+      'Senha deve ter pelo menos 8 caracteres',
+    [`${EN_PASS_LABEL} must contain at least one letter`]: 'Senha deve conter pelo menos uma letra',
+    'Logged out successfully': 'Desconectado com sucesso',
     [`${EN_PASS_LABEL} must be at least 8 characters`]: `${PT_PASS_LABEL} deve ter pelo menos 8 caracteres`,
-    [`${EN_PASS_LABEL} must contain letters and numbers`]: `${PT_PASS_LABEL} deve conter letras e numeros`,
+    [`${EN_PASS_LABEL} must contain letters and numbers`]: `${PT_PASS_LABEL} deve conter letras e números`,
   },
 };
 
@@ -175,20 +193,19 @@ export function useI18n() {
   };
 
   const monthName = (monthNumber) => {
-    return new Intl.DateTimeFormat(currentLocale.value, { month: 'long' }).format(
+    const name = new Intl.DateTimeFormat(currentLocale.value, { month: 'long' }).format(
       new Date(2024, monthNumber - 1, 1),
     );
+    if (!name || typeof name !== 'string') return name;
+    return name.charAt(0).toUpperCase() + name.slice(1);
   };
 
-  const shortWeekDays = () => {
-    const sundayReference = new Date(2023, 0, 1);
-
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(sundayReference);
-      date.setDate(sundayReference.getDate() + index);
-      return new Intl.DateTimeFormat(currentLocale.value, { weekday: 'short' }).format(date);
-    });
+  // Custom short weekday names, capitalized, no dot, same order as Date.getDay()
+  const WEEKDAYS = {
+    'en-GB': ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    'pt-BR': ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
   };
+  const shortWeekDays = () => WEEKDAYS[currentLocale.value] || WEEKDAYS[DEFAULT_LOCALE];
 
   const localizeError = (message) => {
     if (!message) {
