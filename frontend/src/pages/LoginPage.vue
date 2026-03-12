@@ -13,15 +13,29 @@
         <div v-if="showRegisteredMessage || showLoggedOutMessage">
           <div
             v-if="showRegisteredMessage"
-            class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200"
+            class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 relative"
           >
-            {{ t('login.registerSuccess') }}
+            <div class="text-center">{{ t('login.registerSuccess') }}</div>
+            <button
+              @click="closeRegistered"
+              aria-label="Fechar mensagem de registro"
+              class="absolute right-3 top-1.5 text-emerald-200 hover:text-white font-bold text-lg leading-none"
+            >
+              &times;
+            </button>
           </div>
           <div
             v-if="showLoggedOutMessage"
-            class="mb-4 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-4 py-3 text-center text-sm text-indigo-200"
+            class="mb-4 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-200 relative"
           >
-            {{ t('auth.loggedOut') }}
+            <div class="text-center">{{ t('auth.loggedOut') }}</div>
+            <button
+              @click="closeLoggedOut"
+              aria-label="Fechar mensagem de logout"
+              class="absolute right-3 top-1.5 text-indigo-200 hover:text-white font-bold text-lg leading-none"
+            >
+              &times;
+            </button>
           </div>
         </div>
       </Transition>
@@ -69,7 +83,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
 import { useI18n } from '../composables/useI18n.js';
@@ -81,8 +95,57 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const { localizeError, t } = useI18n();
-const showRegisteredMessage = computed(() => route.query.registered === '1');
-const showLoggedOutMessage = computed(() => route.query.loggedOut === '1');
+
+const showRegisteredMessage = ref(false);
+const showLoggedOutMessage = ref(false);
+// initialize immediately from route query so messages render synchronously
+showRegisteredMessage.value = route.query.registered === '1';
+showLoggedOutMessage.value = route.query.loggedOut === '1';
+let registeredTimer;
+let loggedOutTimer;
+
+onMounted(() => {
+  // Capture query params when arriving at the page and remove them from the URL
+  if (showRegisteredMessage.value) {
+    // keep the query param until the message times out or user closes it
+    registeredTimer = setTimeout(() => {
+      showRegisteredMessage.value = false;
+      const q = { ...route.query };
+      delete q.registered;
+      router.replace({ query: q }).catch(() => {});
+    }, 3000);
+  }
+
+  if (showLoggedOutMessage.value) {
+    loggedOutTimer = setTimeout(() => {
+      showLoggedOutMessage.value = false;
+      const q = { ...route.query };
+      delete q.loggedOut;
+      router.replace({ query: q }).catch(() => {});
+    }, 3000);
+  }
+});
+
+onBeforeUnmount(() => {
+  clearTimeout(registeredTimer);
+  clearTimeout(loggedOutTimer);
+});
+
+function closeRegistered() {
+  clearTimeout(registeredTimer);
+  showRegisteredMessage.value = false;
+  const q = { ...route.query };
+  delete q.registered;
+  router.replace({ query: q }).catch(() => {});
+}
+
+function closeLoggedOut() {
+  clearTimeout(loggedOutTimer);
+  showLoggedOutMessage.value = false;
+  const q = { ...route.query };
+  delete q.loggedOut;
+  router.replace({ query: q }).catch(() => {});
+}
 
 async function handleSubmit() {
   error.value = '';
