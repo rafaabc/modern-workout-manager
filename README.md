@@ -11,6 +11,17 @@ Workout Manager is a full-stack application for workout management. It allows us
 
 Built by a QA Engineer exploring generative AI as a development and test automation tool — from architecture to CI/CD, including unit, integration, and API tests with ≥ 95% coverage.
 
+## Live demo
+
+Public demo available at: `https://modern-workout-manager.onrender.com/`
+
+Important notes about this deployment:
+
+- This Render instance exists for learning and portfolio purposes.
+- The current deploy uses SQLite without a persistent disk attached.
+- Data may be lost after redeploys, restarts, or infrastructure recycling.
+- Please avoid relying on long-term data persistence in the public demo.
+
 ## Stack
 
 ### Backend
@@ -259,31 +270,39 @@ docker compose logs -f backend
 
 - The app writes a SQLite file to the path specified by `DATABASE_PATH`. Some PaaS providers (including Render) do not create arbitrary directories by default, which causes the process to fail when the parent directory for the DB file is missing. The application now auto-creates the parent directory, which prevents the crash shown in your logs.
 - For production on Render prefer a persistent disk path (or an external DB). On Render you can attach a Persistent Disk and use an absolute path such as `/data/workout-manager.db` and set `DATABASE_PATH=/data/workout-manager.db` in the Render service environment.
+- The public demo currently does not use persistent storage by design, since this project is maintained as a hobby/learning application.
 
-
- 
 
 ## NPM scripts (root and workspaces)
 
 The repository provides convenience scripts at the workspace root and concrete scripts inside each package.
 
-        - `npm run start:backend` — runs the backend start script (`backend` workspace).
-        - `npm run start:frontend` — runs the frontend dev server (`frontend` workspace).
-        - `npm run docker:up` / `npm run docker:down` / `npm run docker:logs` — Docker Compose helpers.
-        - `npm run test:backend` — runs backend tests (unit, integration, API).
-        - `npm run test:frontend` — runs frontend unit tests.
-        - `npm run test` — runs `test:backend` then `test:frontend` sequentially.
+**Root (`package.json`)**
 
-        - `npm start` — starts the backend using `backend/.env` (the script passes `--env-file=.env`).
-        - `npm run lint` / `npm run lint:fix` — ESLint commands for backend sources.
-        - `npm run test:unit`, `test:integration`, `test:api` — backend tests.
+- `npm run start:backend` — runs the backend start script (`backend` workspace).
+- `npm run start:frontend` — runs the frontend dev server (`frontend` workspace).
+- `npm run docker:up` / `npm run docker:down` / `npm run docker:logs` — Docker Compose helpers.
+- `npm run test:backend` — runs backend tests (unit, integration, API).
+- `npm run test:frontend` — runs frontend unit tests.
+- `npm run test` — runs `test:backend` then `test:frontend` sequentially.
 
-        - `npm run dev` — vite dev server.
-        - `npm run build` — build production frontend into `dist`.
-        - `npm run lint` / `npm run lint:fix` — ESLint commands for frontend sources.
-        - `npm run test:unit` — frontend unit tests (Vitest).
+**Backend (`backend/package.json`)**
 
-Notes:
+- `npm start` — starts the backend using `backend/.env` (the script passes `--env-file=.env`).
+- `npm run lint` / `npm run lint:fix` — ESLint commands for backend sources.
+- `npm run test:unit`, `test:integration`, `test:api` — backend tests.
+
+**Frontend (`frontend/package.json`)**
+
+- `npm run dev` — vite dev server.
+- `npm run build` — build production frontend into `dist`.
+- `npm run lint` / `npm run lint:fix` — ESLint commands for frontend sources.
+- `npm run test:unit` — frontend unit tests (Vitest).
+
+**Notes**
+
+- Root `test` runs all tests sequentially so CI or local `npm run test` covers backend unit/integration/API and frontend unit tests in order.
+- If you prefer running backend and frontend dev servers together, consider adding a small dev script using `concurrently` (not included by default).
 
 ## License
 
