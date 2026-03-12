@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 504">
+  <rect width="720" height="504" fill="#009b3a"/>
+  <g transform="translate(360 252)">
+    <polygon points="-216,0 0,-156 216,0 0,156" fill="#ffdf00"/>
+    <circle r="96" fill="#002776"/>
+    <path d="M-60 10a180 180 0 0 0 120 0" fill="none" stroke="#fff" stroke-width="8" transform="rotate(-18)"/>
+    <!-- simplified stars -->
+    <g fill="#fff" transform="translate(-20,-10) scale(1)">
+      <circle cx="10" cy="-6" r="4"/>
+      <circle cx="30" cy="8" r="4"/>
+      <circle cx="-10" cy="12" r="3"/>
+    </g>
+  </g>
+</svg>

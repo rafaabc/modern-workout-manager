@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import WorkoutsMetrics from '../../../src/components/WorkoutsMetrics.vue';
 import { useMetricsStore } from '../../../src/stores/metricsStore.js';
+import { useI18n } from '../../../src/composables/useI18n.js';
 
 vi.mock('../../../src/composables/useApi.js', () => ({
   useApi: () => ({ request: vi.fn().mockResolvedValue({}) }),
@@ -166,6 +167,16 @@ describe('WorkoutsMetrics', () => {
 
     expect(monthEntries[11].find('.month-name').text()).toBe('December');
     expect(monthEntries[11].find('.month-count').text()).toBe('1');
+  });
+
+  it('displays month names capitalized in pt-BR', () => {
+    const { setLocale } = useI18n();
+    setLocale('pt-BR');
+    store.metrics = createMockMetrics();
+    const wrapper = mountMetrics();
+    const monthEntries = wrapper.findAll('.month-entry');
+    expect(monthEntries[0].find('.month-name').text()).toBe('Janeiro');
+    setLocale('en-GB');
   });
 
   it('shows loading indicator when loading is true', () => {

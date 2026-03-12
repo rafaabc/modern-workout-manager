@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 504">
+  <!-- Simplified Union Jack scaled to 720x504 to match BR flag box -->
+  <rect width="720" height="504" fill="#012169"/>
+
+  <!-- white diagonals (broad) -->
+  <g fill="#fff">
+    <path d="M0 0 L72 0 L720 432 L720 504 L648 504 L0 72 Z"/>
+    <path d="M720 0 L720 72 L72 504 L0 504 L0 432 L648 0 Z"/>
+  </g>
+
+  <!-- red diagonals (narrow) -->
+  <g fill="#C8102E">
+    <path d="M0 0 L48 0 L720 384 L720 432 L672 432 L0 48 Z"/>
+    <path d="M720 0 L720 48 L48 504 L0 504 L0 456 L672 0 Z"/>
+  </g>
+
+  <!-- central white cross -->
+  <rect x="288" y="0" width="144" height="504" fill="#fff"/>
+  <rect x="0" y="204" width="720" height="96" fill="#fff"/>
+
+  <!-- central red cross -->
+  <rect x="312" y="0" width="96" height="504" fill="#C8102E"/>
+  <rect x="0" y="219" width="720" height="66" fill="#C8102E"/>
+</svg>

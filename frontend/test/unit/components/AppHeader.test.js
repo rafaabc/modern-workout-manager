@@ -87,4 +87,21 @@ describe('AppHeader', () => {
     expect(options[0].text()).toContain('Portuguese (Brazil)');
     expect(options[1].text()).toContain('British English');
   });
+
+  it('renders flag images with sr-only labels for accessibility', () => {
+    const wrapper = mountAppHeader();
+    const imgs = wrapper.findAll('.locale-option img');
+    expect(imgs.length).toBeGreaterThanOrEqual(1);
+
+    // at least one flag src should reference our assets folder or be inlined as data URI
+    const srcs = imgs.map((n) => n.attributes('src') || '');
+    const joined = srcs.join('');
+    expect(joined.includes('flags/') || joined.startsWith('data:image/svg+xml')).toBe(true);
+
+    // sr-only labels exist and contain the language names
+    const sr = wrapper.findAll('.locale-option .sr-only');
+    expect(sr).toHaveLength(2);
+    expect(sr[0].text()).toContain('Portuguese (Brazil)');
+    expect(sr[1].text()).toContain('British English');
+  });
 });
