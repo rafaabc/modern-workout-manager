@@ -180,6 +180,29 @@ cd frontend && npm run test:unit
 cd frontend && npm run test:unit:coverage
 ```
 
+### E2E tests (Playwright)
+
+E2E tests run against the real stack, so both the backend and frontend dev servers must be running before you execute them.
+
+```bash
+# Terminal 1 — start backend
+npm run start:backend
+
+# Terminal 2 — start frontend
+npm run start:frontend
+
+# Terminal 3 — run E2E tests
+npm run test:e2e                                   # headless, all browsers
+npm --workspace=frontend run test:e2e:headed        # headed (opens browser)
+npm --workspace=frontend run test:e2e:report        # open HTML report
+```
+
+**First-time setup** — download the Playwright browser binaries once:
+
+```bash
+npx --prefix frontend playwright install
+```
+
 ## API endpoints
 
 | Method | Route | Auth | Description |
