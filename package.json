@@ -18,14 +18,16 @@
     "prepare": "husky",
     "start:backend": "npm --workspace=backend run start",
     "start:frontend": "npm --workspace=frontend run dev",
+    "test:e2e": "npm --workspace=frontend run test:e2e",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f backend"
   },
   "devDependencies": {
-    "prettier": "^3.5.3",
     "husky": "^9.1.7",
-    "lint-staged": "^15.4.3"
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.3",
+    "wait-on": "^9.0.4"
   },
   "lint-staged": {
     "backend/**/*.js": [

@@ -1,0 +1,80 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./frontend/node_modules/@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx --prefix frontend playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx --prefix frontend playwright install-deps chromium
+
+      - name: Validate required secrets
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          if [ -z "$JWT_SECRET" ]; then
+            echo "::error::JWT_SECRET secret is not set in repository secrets"
+            exit 1
+          fi
+
+      - name: Create .env for backend
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          echo "JWT_SECRET=$JWT_SECRET" >> backend/.env
+          echo "DATABASE_PATH=./data/e2e-test.db" >> backend/.env
+          echo "PORT=3000" >> backend/.env
+          echo "NODE_ENV=test" >> backend/.env
+
+      - name: Start backend
+        run: npm run start:backend > /tmp/backend.log 2>&1 &
+
+      - name: Start frontend
+        run: npm run start:frontend > /tmp/frontend.log 2>&1 &
+
+      - name: Wait for services to be ready
+        run: npx wait-on http://localhost:3000/api-docs http://localhost:5173 --timeout 60000 || (echo "=== Backend Log ===" && cat /tmp/backend.log && echo "=== Frontend Log ===" && cat /tmp/frontend.log && exit 1)
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: frontend/playwright-report/
+          retention-days: 7

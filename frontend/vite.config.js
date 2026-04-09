@@ -14,6 +14,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    include: ['test/**/*.test.js'],
     coverage: {
       include: ['src/**'],
       exclude: ['src/main.js', 'src/pages/DashboardPage.vue'],
