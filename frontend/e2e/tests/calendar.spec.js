@@ -6,6 +6,24 @@ import { createAndLoginUser, seedAuthState } from '../fixtures/test-data.js';
 const TEST_DAY = 15;
 const UNMARKED_DAY = 14;
 
+function currentMonthPayload(day) {
+  const now = new Date();
+  return { day, month: now.getMonth() + 1, year: now.getFullYear() };
+}
+
+async function addWorkoutAndReload(request, page, token, stepLabel) {
+  await test.step(stepLabel, async () => {
+    await request.post('/api/workouts/calendar', {
+      headers: { Authorization: `Bearer ${token}` },
+      data: currentMonthPayload(TEST_DAY),
+    });
+  });
+  await page.reload();
+  const dashboard = new DashboardPage(page);
+  await expect(dashboard.getDayCell(TEST_DAY)).toBeVisible();
+  return dashboard;
+}
+
 test.describe('Workout Calendar', () => {
   let token;
   let username;
@@ -21,10 +39,9 @@ test.describe('Workout Calendar', () => {
   });
 
   test.afterEach(async ({ request }) => {
-    const now = new Date();
     const res = await request.delete('/api/workouts/calendar', {
       headers: { Authorization: `Bearer ${token}` },
-      data: { day: TEST_DAY, month: now.getMonth() + 1, year: now.getFullYear() },
+      data: currentMonthPayload(TEST_DAY),
     });
     // 404 is acceptable — workout may have already been removed by the test
     if (!res.ok() && res.status() !== 404) {
@@ -50,18 +67,7 @@ test.describe('Workout Calendar', () => {
   });
 
   test('should remove an existing workout and unmark the day', async ({ request, page }) => {
-    const now = new Date();
-
-    await test.step('add workout via API', async () => {
-      await request.post('/api/workouts/calendar', {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { day: TEST_DAY, month: now.getMonth() + 1, year: now.getFullYear() },
-      });
-    });
-
-    await page.reload();
-    const dashboard = new DashboardPage(page);
-    await expect(dashboard.getDayCell(TEST_DAY)).toBeVisible();
+    const dashboard = await addWorkoutAndReload(request, page, token, 'add workout via API');
 
     await test.step('verify day 15 is marked after reload', async () => {
       await expect(dashboard.getDayCell(TEST_DAY)).toHaveClass(/workout-day/);
@@ -80,18 +86,12 @@ test.describe('Workout Calendar', () => {
     request,
     page,
   }) => {
-    const now = new Date();
-
-    await test.step('add workout on day 15 via API', async () => {
-      await request.post('/api/workouts/calendar', {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { day: TEST_DAY, month: now.getMonth() + 1, year: now.getFullYear() },
-      });
-    });
-
-    await page.reload();
-    const dashboard = new DashboardPage(page);
-    await expect(dashboard.getDayCell(TEST_DAY)).toBeVisible();
+    const dashboard = await addWorkoutAndReload(
+      request,
+      page,
+      token,
+      'add workout on day 15 via API',
+    );
 
     await test.step('marked day (15) has gradient background classes', async () => {
       const markedCell = dashboard.getDayCell(TEST_DAY);
