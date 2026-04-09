@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - 'feat/**'
+  workflow_dispatch:
 
 jobs:
   e2e:
@@ -28,6 +29,13 @@ jobs:
       - name: Install Playwright browsers
         run: npx --prefix frontend playwright install --with-deps
 
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+            echo "::error::JWT_SECRET secret is not set in repository secrets"
+            exit 1
+          fi
+
       - name: Create .env for backend
         run: |
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> backend/.env
@@ -36,13 +44,13 @@ jobs:
           echo "NODE_ENV=test" >> backend/.env
 
       - name: Start backend
-        run: npm run start:backend &
+        run: npm run start:backend > /tmp/backend.log 2>&1 &
 
       - name: Start frontend
-        run: npm run start:frontend &
+        run: npm run start:frontend > /tmp/frontend.log 2>&1 &
 
       - name: Wait for services to be ready
-        run: npx wait-on http://localhost:3000/api-docs http://localhost:5173 --timeout 30000
+        run: npx wait-on http://localhost:3000/api-docs http://localhost:5173 --timeout 60000 || (echo "=== Backend Log ===" && cat /tmp/backend.log && echo "=== Frontend Log ===" && cat /tmp/frontend.log && exit 1)
 
       - name: Run E2E tests
         run: npm run test:e2e
@@ -51,6 +59,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ github.run_id }}
           path: frontend/playwright-report/
           retention-days: 7
