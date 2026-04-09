@@ -7,7 +7,7 @@ COPY package.json package-lock.json ./
 COPY frontend/package.json frontend/
 COPY backend/package.json backend/
 
-RUN npm pkg delete scripts.prepare && npm ci --workspace=frontend
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm pkg delete scripts.prepare && npm ci --workspace=frontend
 
 COPY frontend/ frontend/
 
