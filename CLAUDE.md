@@ -102,12 +102,12 @@ Vite dev server proxies `/api/*` to `http://localhost:3000`, so frontend code al
 
 ### Testing Strategy
 
-Three-tier backend pyramid:
-- **Unit** (`test/unit/`) — Mock repositories; test service/validator logic.
-- **Integration** (`test/integration/`) — Real in-memory SQLite; test repository SQL.
-- **API** (`test/api/`) — Real HTTP with `fetch`; test full request/response contracts.
-
-Frontend uses Vitest + Vue Test Utils + jsdom. Mocks `fetch`, `localStorage`, and Vue Router as needed.
+Four-tier pyramid:
+- **Unit** (`backend/test/unit/`) — Mock repositories; test service/validator logic.
+- **Integration** (`backend/test/integration/`) — Real in-memory SQLite; test repository SQL.
+- **API** (`backend/test/api/`) — Real HTTP with `fetch`; test full request/response contracts.
+- **Unit** (`frontend/test/unit/`) — Vitest + Vue Test Utils + jsdom. Mocks `fetch`, `localStorage`, and Vue Router.
+- **E2E** (`frontend/e2e/`) — Playwright in real browsers (Chromium, Firefox, WebKit, mobile). Covers auth, calendar, metrics, authorization, and session flows against the running stack.
 
 ## Environment Variables
 

@@ -2,6 +2,7 @@
 
 ![Backend CI](https://github.com/rafaabc/modern-workout-manager/actions/workflows/backend.yml/badge.svg)
 ![Frontend CI](https://github.com/rafaabc/modern-workout-manager/actions/workflows/frontend.yml/badge.svg)
+![E2E CI](https://github.com/rafaabc/modern-workout-manager/actions/workflows/e2e.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rafaabc_modern-workout-manager&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rafaabc_modern-workout-manager)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -9,7 +10,7 @@
 
 Workout Manager is a full-stack application for workout management. It allows user registration, scheduling workouts on a monthly calendar, tracking annual metrics, and setting workout goals.
 
-Built by a QA Engineer exploring generative AI as a development and test automation tool — from architecture to CI/CD, including unit, integration, and API tests with ≥ 95% coverage.
+Built by a QA Engineer exploring generative AI as a development and test automation tool — from architecture to CI/CD, including unit, integration, API, and E2E tests with ≥ 95% coverage.
 
 ## Live demo
 
@@ -48,6 +49,7 @@ Important notes about this deployment:
 | Vite | Build tool and dev server |
 | Vitest | Test framework |
 | Vue Test Utils | Component testing utilities |
+| Playwright | E2E browser testing |
 | ESLint | Linting |
 
 ## Directory structure
@@ -57,7 +59,8 @@ modern-workout-manager/
 ├── .github/
 │   └── workflows/
 │       ├── backend.yml          # CI: lint → unit → integration → API tests
-│       └── frontend.yml         # CI: lint → unit tests
+│       ├── frontend.yml         # CI: lint → unit tests
+│       └── e2e.yml              # CI: E2E tests (Playwright, all browsers)
 ├── backend/
 │   ├── resources/
 │   │   └── swagger.json         # OpenAPI 3.0 specification
@@ -87,6 +90,11 @@ modern-workout-manager/
 │   │   ├── pages/               # LoginPage, RegisterPage, DashboardPage
 │   │   ├── router/              # Routes with auth guards
 │   │   └── stores/              # Pinia stores (auth, calendar, metrics)
+│   ├── e2e/
+│   │   ├── fixtures/            # Test data factories (randomized credentials)
+│   │   ├── pages/               # Page Object Models (LoginPage, RegisterPage, DashboardPage)
+│   │   └── tests/               # Spec files (auth, calendar, metrics, session, authorization)
+│   ├── playwright.config.js     # Playwright config (Chromium, Firefox, WebKit, mobile)
 │   └── test/
 │       └── unit/                # Unit tests (components, stores)
 ├── Dockerfile                   # Multi-stage build (frontend + backend)
@@ -143,15 +151,17 @@ Data persists between restarts thanks to the `db-data` volume mounted at `/app/d
 ## Testing strategy
 
 ```
-        ╱‾‾‾‾‾‾‾‾‾‾╲
-       ╱  API Tests  ╲
-      ╱──────────────────╲
-     ╱  Integration Tests  ╲
-    ╱──────────────────────────╲
-   ╱    Unit Tests (Backend)    ╲
-  ╱──────────────────────────────────╲
- ╱    Unit Tests (Frontend)           ╲
-╱──────────────────────────────────────────╲
+              ╱‾‾‾‾‾‾‾‾‾‾‾‾╲
+             ╱   E2E Tests   ╲
+            ╱────────────────────╲
+           ╱    API Tests         ╲
+          ╱──────────────────────────╲
+         ╱    Integration Tests        ╲
+        ╱──────────────────────────────────╲
+       ╱    Unit Tests (Backend)             ╲
+      ╱──────────────────────────────────────────╲
+     ╱    Unit Tests (Frontend)                    ╲
+    ╱──────────────────────────────────────────────────╲
 ```
 
 | Layer | Tool | What it validates | Database |
@@ -160,6 +170,7 @@ Data persists between restarts thanks to the `db-data` volume mounted at `/app/d
 | Integration | Node.js Test Runner | Repositories, SQL, constraints | SQLite in-memory |
 | API | Node.js Test Runner + fetch | HTTP contracts, JWT, confirmed persistence | SQLite in-memory |
 | Unit (frontend) | Vitest + Vue Test Utils | Components, stores, composables | None (HTTP mocks) |
+| E2E | Playwright | Full user flows in real browser (auth, calendar, metrics, session) | Real SQLite via running backend |
 
 ## Test commands
 
@@ -308,6 +319,7 @@ The repository provides convenience scripts at the workspace root and concrete s
 - `npm run test:backend` — runs backend tests (unit, integration, API).
 - `npm run test:frontend` — runs frontend unit tests.
 - `npm run test` — runs `test:backend` then `test:frontend` sequentially.
+- `npm run test:e2e` — runs Playwright E2E tests (requires backend + frontend running).
 
 **Backend (`backend/package.json`)**
 
@@ -321,6 +333,9 @@ The repository provides convenience scripts at the workspace root and concrete s
 - `npm run build` — build production frontend into `dist`.
 - `npm run lint` / `npm run lint:fix` — ESLint commands for frontend sources.
 - `npm run test:unit` — frontend unit tests (Vitest).
+- `npm run test:e2e` — Playwright E2E tests (headless, all browsers).
+- `npm run test:e2e:headed` — E2E tests with browser visible.
+- `npm run test:e2e:report` — open the last Playwright HTML report.
 
 **Notes**
 
