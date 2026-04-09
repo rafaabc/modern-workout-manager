@@ -148,28 +148,24 @@ Application available at `http://localhost:3000`.
 
 Data persists between restarts thanks to the `db-data` volume mounted at `/app/database`.
 
+> **Note:** The [live demo](#live-demo) on Render does **not** use persistent storage — data may be lost on restarts. Persistence only applies to this local Docker Compose setup.
+
 ## Testing strategy
 
 ```
-              ╱‾‾‾‾‾‾‾‾‾‾‾‾╲
-             ╱   E2E Tests   ╲
-            ╱────────────────────╲
-           ╱    API Tests         ╲
-          ╱──────────────────────────╲
-         ╱    Integration Tests        ╲
-        ╱──────────────────────────────────╲
-       ╱    Unit Tests (Backend)             ╲
-      ╱──────────────────────────────────────────╲
-     ╱    Unit Tests (Frontend)                    ╲
-    ╱──────────────────────────────────────────────────╲
+ E2E           ████████████                                        11 tests
+ API           ████████████████████████                            21 tests
+ Integration   ███████████████████                                 16 tests
+ Unit          ████████████████████████████████████████████████   152 tests
+               (56 backend + 96 frontend)
 ```
 
 | Layer | Tool | What it validates | Database |
 |---|---|---|---|
 | Unit (backend) | Node.js Test Runner | Services, validators, business rules | None (mocks) |
+| Unit (frontend) | Vitest + Vue Test Utils | Components, stores, composables | None (HTTP mocks) |
 | Integration | Node.js Test Runner | Repositories, SQL, constraints | SQLite in-memory |
 | API | Node.js Test Runner + fetch | HTTP contracts, JWT, confirmed persistence | SQLite in-memory |
-| Unit (frontend) | Vitest + Vue Test Utils | Components, stores, composables | None (HTTP mocks) |
 | E2E | Playwright | Full user flows in real browser (auth, calendar, metrics, session) | Real SQLite via running backend |
 
 ## Test commands
