@@ -5,16 +5,18 @@ import { createTestUser } from '../fixtures/test-data.js';
 test.describe('Session Persistence', () => {
   let token;
   let username;
-  let password;
 
   test.beforeAll(async ({ request }) => {
-    ({ username, password } = createTestUser());
-    await request.post('/api/users/register', { data: { username, password } });
-    const res = await request.post('/api/users/login', { data: { username, password } });
+    const user = createTestUser();
+    username = user.username;
+    await request.post('/api/users/register', { data: user });
+    const res = await request.post('/api/users/login', { data: user });
     ({ token } = await res.json());
   });
 
   test.beforeEach(async ({ page }) => {
+    // Navigate to any page first so that localStorage.setItem runs in the correct origin.
+    // Playwright's page.evaluate can only access localStorage for the currently loaded URL.
     await page.goto('/login');
     await page.evaluate(
       ({ token, username }) => {
