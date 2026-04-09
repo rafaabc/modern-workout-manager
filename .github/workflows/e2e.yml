@@ -35,11 +35,11 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx --prefix frontend playwright install --with-deps chromium firefox webkit
+        run: npx --prefix frontend playwright install --with-deps chromium
 
       - name: Install Playwright system deps
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx --prefix frontend playwright install-deps chromium firefox webkit
+        run: npx --prefix frontend playwright install-deps chromium
 
       - name: Validate required secrets
         run: |

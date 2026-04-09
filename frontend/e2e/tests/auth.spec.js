@@ -21,7 +21,7 @@ test.describe('Authentication', () => {
 
     await test.step('verify redirect to login with success message', async () => {
       await expect(page).toHaveURL(/\/login/);
-      await expect(page.locator('.text-emerald-200')).toBeVisible();
+      await expect(page.locator('div.text-emerald-200')).toBeVisible();
     });
   });
 
