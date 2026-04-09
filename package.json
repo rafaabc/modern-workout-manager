@@ -18,6 +18,7 @@
     "prepare": "husky",
     "start:backend": "npm --workspace=backend run start",
     "start:frontend": "npm --workspace=frontend run dev",
+    "test:e2e": "npm --workspace=frontend run test:e2e",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f backend"
