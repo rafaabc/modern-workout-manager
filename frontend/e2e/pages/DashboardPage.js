@@ -17,6 +17,8 @@ export class DashboardPage {
     await this.getDayCell(day).click();
   }
 
+  // NOTE: Returns a one-shot snapshot via getAttribute — no auto-retry.
+  // For assertions, prefer: await expect(getDayCell(day)).toHaveClass(/workout-day/)
   async isDayMarked(day) {
     const classes = await this.getDayCell(day).getAttribute('class');
     return classes?.includes('workout-day') ?? false;

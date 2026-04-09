@@ -35,13 +35,14 @@ test.describe('Workout Calendar', () => {
 
   test.afterEach(async ({ request }) => {
     const now = new Date();
-    // Ignore 404 if workout was already removed by the test
-    await request
-      .delete('/api/workouts/calendar', {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { day: TEST_DAY, month: now.getMonth() + 1, year: now.getFullYear() },
-      })
-      .catch(() => {});
+    const res = await request.delete('/api/workouts/calendar', {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { day: TEST_DAY, month: now.getMonth() + 1, year: now.getFullYear() },
+    });
+    // 404 is acceptable — workout may have already been removed by the test
+    if (!res.ok() && res.status() !== 404) {
+      throw new Error(`afterEach cleanup failed with status ${res.status()}`);
+    }
   });
 
   test('should add a workout on a day and mark it visually', async ({ page }) => {
@@ -49,7 +50,7 @@ test.describe('Workout Calendar', () => {
 
     await test.step('verify day 15 is initially unmarked', async () => {
       await expect(dashboard.getDayCell(TEST_DAY)).toBeVisible();
-      expect(await dashboard.isDayMarked(TEST_DAY)).toBe(false);
+      await expect(dashboard.getDayCell(TEST_DAY)).not.toHaveClass(/workout-day/);
     });
 
     await test.step('click day 15 to add workout', async () => {
@@ -73,6 +74,7 @@ test.describe('Workout Calendar', () => {
 
     await page.reload();
     const dashboard = new DashboardPage(page);
+    await expect(dashboard.getDayCell(TEST_DAY)).toBeVisible();
 
     await test.step('verify day 15 is marked after reload', async () => {
       await expect(dashboard.getDayCell(TEST_DAY)).toHaveClass(/workout-day/);
@@ -102,6 +104,7 @@ test.describe('Workout Calendar', () => {
 
     await page.reload();
     const dashboard = new DashboardPage(page);
+    await expect(dashboard.getDayCell(TEST_DAY)).toBeVisible();
 
     await test.step('marked day (15) has gradient background classes', async () => {
       const markedCell = dashboard.getDayCell(TEST_DAY);
