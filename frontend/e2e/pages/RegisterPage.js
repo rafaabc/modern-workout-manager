@@ -1,19 +1,11 @@
-export class RegisterPage {
-  constructor(page) {
-    this.page = page;
-    this.usernameInput = page.locator('#username');
-    this.passwordInput = page.locator('#password');
-    this.submitButton = page.locator('button[type="submit"]');
-    this.errorMessage = page.locator('p.error');
-  }
+import { AuthPage } from './AuthPage.js';
 
-  async goto() {
-    await this.page.goto('/register');
+export class RegisterPage extends AuthPage {
+  constructor(page) {
+    super(page, '/register');
   }
 
   async register(username, password) {
-    await this.usernameInput.fill(username);
-    await this.passwordInput.fill(password);
-    await this.submitButton.click();
+    await this._fillAndSubmit(username, password);
   }
 }

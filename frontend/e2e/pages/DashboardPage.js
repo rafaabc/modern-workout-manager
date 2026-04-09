@@ -19,11 +19,15 @@ export class DashboardPage {
 
   async isDayMarked(day) {
     const classes = await this.getDayCell(day).getAttribute('class');
-    return classes.includes('workout-day');
+    return classes?.includes('workout-day') ?? false;
   }
 
   async getYearTotal() {
     return parseInt(await this.yearTotal.textContent(), 10);
+  }
+
+  async goto() {
+    await this.page.goto('/');
   }
 
   async logout() {
