@@ -25,7 +25,7 @@ export class DashboardPage {
   }
 
   async getYearTotal() {
-    return parseInt(await this.yearTotal.textContent(), 10);
+    return Number.parseInt(await this.yearTotal.textContent(), 10);
   }
 
   async goto() {

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { RegisterPage } from '../pages/RegisterPage.js';
-import { createTestUser } from '../fixtures/test-data.js';
+import { createTestUser, seedAuthState } from '../fixtures/test-data.js';
 
 test.describe('Authentication', () => {
   test('should register a new user and redirect to login with success message', async ({
@@ -73,15 +73,7 @@ test.describe('Authentication', () => {
     const { token } = await loginRes.json();
 
     await test.step('seed auth state into localStorage', async () => {
-      await page.goto('/login');
-      await page.evaluate(
-        ({ token, username }) => {
-          localStorage.setItem('token', token);
-          localStorage.setItem('username', username);
-          localStorage.setItem('lastActivityAt', String(Date.now()));
-        },
-        { token, username },
-      );
+      await seedAuthState(page, token, username);
     });
 
     await test.step('navigate to /login while authenticated', async () => {

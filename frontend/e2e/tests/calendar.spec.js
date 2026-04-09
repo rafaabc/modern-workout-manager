@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { DashboardPage } from '../pages/DashboardPage.js';
-import { createTestUser } from '../fixtures/test-data.js';
+import { createAndLoginUser, seedAuthState } from '../fixtures/test-data.js';
 
 // Day 15 is always present in any month — safe for all test runs
 const TEST_DAY = 15;
@@ -11,24 +11,11 @@ test.describe('Workout Calendar', () => {
   let username;
 
   test.beforeAll(async ({ request }) => {
-    const user = createTestUser();
-    username = user.username;
-    await request.post('/api/users/register', { data: user });
-    const res = await request.post('/api/users/login', { data: user });
-    ({ token } = await res.json());
+    ({ token, username } = await createAndLoginUser(request));
   });
 
   test.beforeEach(async ({ page }) => {
-    // Navigate to /login first so localStorage.setItem runs in the correct origin
-    await page.goto('/login');
-    await page.evaluate(
-      ({ token, username }) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('username', username);
-        localStorage.setItem('lastActivityAt', String(Date.now()));
-      },
-      { token, username },
-    );
+    await seedAuthState(page, token, username);
     await page.goto('/');
     await expect(page).toHaveURL('/');
   });

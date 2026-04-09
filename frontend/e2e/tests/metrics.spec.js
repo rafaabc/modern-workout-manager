@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { DashboardPage } from '../pages/DashboardPage.js';
-import { createTestUser } from '../fixtures/test-data.js';
+import { createAndLoginUser, seedAuthState } from '../fixtures/test-data.js';
 
 const WORKOUTS_TO_ADD = 3;
 
@@ -12,11 +12,7 @@ test.describe('Workout Metrics', () => {
   const month = now.getMonth() + 1;
 
   test.beforeAll(async ({ request }) => {
-    const user = createTestUser();
-    username = user.username;
-    await request.post('/api/users/register', { data: user });
-    const res = await request.post('/api/users/login', { data: user });
-    ({ token } = await res.json());
+    ({ token, username } = await createAndLoginUser(request));
 
     // Add 3 workouts via API on days 1, 2, 3 of the current month
     for (let day = 1; day <= WORKOUTS_TO_ADD; day++) {
@@ -41,16 +37,7 @@ test.describe('Workout Metrics', () => {
   });
 
   test('should display the correct total number of workouts for the year', async ({ page }) => {
-    // Navigate to /login first so localStorage.setItem runs in the correct origin
-    await page.goto('/login');
-    await page.evaluate(
-      ({ token, username }) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('username', username);
-        localStorage.setItem('lastActivityAt', String(Date.now()));
-      },
-      { token, username },
-    );
+    await seedAuthState(page, token, username);
     await page.goto('/');
     await expect(page).toHaveURL('/');
 
