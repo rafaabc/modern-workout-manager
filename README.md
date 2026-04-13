@@ -18,6 +18,8 @@ Built by a QA Engineer exploring generative AI as a development and test automat
 
 > SQLite without a persistent disk — data may be lost on restarts.
 
+https://github.com/user-attachments/assets/08b2e405-632b-4315-8187-bf30558dfee8
+
 ## Stack
 
 ### Backend
