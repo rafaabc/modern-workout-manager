@@ -44,20 +44,26 @@ jobs:
       - name: Validate required secrets
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: |
           if [ -z "$JWT_SECRET" ]; then
             echo "::error::JWT_SECRET secret is not set in repository secrets"
+            exit 1
+          fi
+          if [ -z "$MONGODB_URI" ]; then
+            echo "::error::MONGODB_URI secret is not set in repository secrets"
             exit 1
           fi
 
       - name: Create .env for backend
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: |
-          echo "JWT_SECRET=$JWT_SECRET" >> backend/.env
-          echo "DATABASE_PATH=./data/e2e-test.db" >> backend/.env
-          echo "PORT=3000" >> backend/.env
-          echo "NODE_ENV=test" >> backend/.env
+          echo "JWT_SECRET=$JWT_SECRET" >> .env
+          echo "MONGODB_URI=$MONGODB_URI" >> .env
+          echo "PORT=3000" >> .env
+          echo "NODE_ENV=test" >> .env
 
       - name: Start backend
         run: npm run start:backend > /tmp/backend.log 2>&1 &
