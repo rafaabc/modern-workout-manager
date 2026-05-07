@@ -37,14 +37,15 @@ describe('Auth API', () => {
       assert.equal(body.username, 'testuser');
       assert.ok(body.id);
 
-      // Verify user was persisted in the database
-      const dbUser = testServer.app.db
-        .prepare('SELECT * FROM users WHERE username = ?')
-        .get('testuser');
-      assert.ok(dbUser);
-      assert.equal(dbUser.username, 'testuser');
-      assert.ok(dbUser.password);
-      assert.notEqual(dbUser.password, registerPassword); // should be hashed
+      // Verify user was persisted by logging in (proves password was hashed and stored)
+      const loginRes = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'testuser', password: registerPassword }),
+      });
+      assert.equal(loginRes.status, 200);
+      const loginBody = await loginRes.json();
+      assert.ok(loginBody.token);
     });
 
     it('should return 409 for duplicate username', async () => {

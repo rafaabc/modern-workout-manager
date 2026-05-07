@@ -4,7 +4,6 @@ import swaggerUi from 'swagger-ui-express';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { openDatabase } from './database/database.js';
 import { createUserRepository } from './repositories/userRepository.js';
 import { createUserService } from './services/userService.js';
 import { createUserController } from './controllers/userController.js';
@@ -20,20 +19,18 @@ import { createMetricsRoutes } from './routes/metricsRoutes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export function createApp(dbPath) {
-  const db = openDatabase(dbPath);
-
-  const userRepository = createUserRepository(db);
+export function createApp() {
+  const userRepository = createUserRepository();
   const userService = createUserService(userRepository);
   const userController = createUserController(userService);
   const userRoutes = createUserRoutes(userController);
 
-  const workoutRepository = createWorkoutRepository(db);
+  const workoutRepository = createWorkoutRepository();
   const workoutService = createWorkoutService(workoutRepository);
   const workoutController = createWorkoutController(workoutService);
   const workoutRoutes = createWorkoutRoutes(workoutController);
 
-  const goalRepository = createGoalRepository(db);
+  const goalRepository = createGoalRepository();
   const metricsService = createMetricsService(workoutRepository, goalRepository);
   const metricsController = createMetricsController(metricsService);
   const metricsRoutes = createMetricsRoutes(metricsController);
@@ -57,8 +54,6 @@ export function createApp(dbPath) {
       res.sendFile(join(__dirname, '../../frontend/dist/index.html'));
     });
   }
-
-  app.db = db;
 
   return app;
 }

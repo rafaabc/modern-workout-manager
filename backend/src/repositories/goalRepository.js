@@ -1,21 +1,21 @@
-export function createGoalRepository(db) {
-  const findByUserStmt = db.prepare(
-    'SELECT id, user_id, goal, year, updated_at FROM goals WHERE user_id = ?',
-  );
-  const upsertStmt = db.prepare(
-    `INSERT INTO goals (user_id, goal, year, updated_at)
-     VALUES (@userId, @goal, @year, datetime('now'))
-     ON CONFLICT(user_id) DO UPDATE SET goal = @goal, year = @year, updated_at = datetime('now')`,
-  );
+import mongoose from 'mongoose';
+import { Goal } from '../database/models/Goal.js';
 
+export function createGoalRepository() {
   return {
-    findByUser(userId) {
-      return findByUserStmt.get(userId) || undefined;
+    async findByUser(userId) {
+      const doc = await Goal.findOne({ userId: new mongoose.Types.ObjectId(userId) }).lean();
+      if (!doc) return undefined;
+      return { ...doc, id: doc._id.toString() };
     },
 
-    upsert({ userId, goal, year }) {
-      upsertStmt.run({ userId, goal, year });
-      return findByUserStmt.get(userId);
+    async upsert({ userId, goal, year }) {
+      const doc = await Goal.findOneAndUpdate(
+        { userId: new mongoose.Types.ObjectId(userId) },
+        { goal, year },
+        { upsert: true, new: true },
+      ).lean();
+      return { ...doc, id: doc._id.toString() };
     },
   };
 }

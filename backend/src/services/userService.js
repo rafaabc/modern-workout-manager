@@ -30,7 +30,7 @@ function getJwtSecret() {
 
 export function createUserService(userRepository) {
   return {
-    register({ username, password }) {
+    async register({ username, password }) {
       const usernameValidation = validateUsername(username);
       if (!usernameValidation.valid) {
         const error = new Error(usernameValidation.error);
@@ -45,7 +45,7 @@ export function createUserService(userRepository) {
         throw error;
       }
 
-      const existing = userRepository.findByUsername(username);
+      const existing = await userRepository.findByUsername(username);
       if (existing) {
         const error = new Error('Username already exists');
         error.status = 409;
@@ -56,7 +56,7 @@ export function createUserService(userRepository) {
       return userRepository.create({ username, password: hashedPassword });
     },
 
-    login({ username, password }) {
+    async login({ username, password }) {
       const usernameValidation = validateUsername(username);
       if (!usernameValidation.valid) {
         const error = new Error('Invalid credentials');
@@ -64,7 +64,7 @@ export function createUserService(userRepository) {
         throw error;
       }
 
-      const user = userRepository.findByUsername(username);
+      const user = await userRepository.findByUsername(username);
       if (!user) {
         const error = new Error('Invalid credentials');
         error.status = 401;

@@ -1,14 +1,14 @@
 export function createMetricsService(workoutRepository, goalRepository) {
   return {
-    getMetrics({ userId, year }) {
+    async getMetrics({ userId, year }) {
       if (!Number.isInteger(year) || year < 1) {
         const error = new Error('Year must be a positive integer');
         error.status = 400;
         throw error;
       }
 
-      const totalYear = workoutRepository.countByYear({ userId, year });
-      const grouped = workoutRepository.countByYearGrouped({ userId, year });
+      const totalYear = await workoutRepository.countByYear({ userId, year });
+      const grouped = await workoutRepository.countByYearGrouped({ userId, year });
 
       const byMonth = Array.from({ length: 12 }, (_, i) => {
         const month = i + 1;
@@ -16,7 +16,7 @@ export function createMetricsService(workoutRepository, goalRepository) {
         return { month, count: found ? found.count : 0 };
       });
 
-      const goalRow = goalRepository.findByUser(userId);
+      const goalRow = await goalRepository.findByUser(userId);
       let goal = null;
       let goalProgress = null;
 
@@ -28,7 +28,7 @@ export function createMetricsService(workoutRepository, goalRepository) {
       return { totalYear, goal, goalProgress, byMonth };
     },
 
-    setGoal({ userId, goal, year }) {
+    async setGoal({ userId, goal, year }) {
       if (!Number.isInteger(goal) || goal < 1) {
         const error = new Error('Goal must be a positive integer');
         error.status = 400;
