@@ -84,12 +84,13 @@ describe('Calendar API', () => {
       assert.equal(body.year, 2025);
       assert.ok(body.id);
 
-      // Verify persistence in database
-      const dbWorkout = testServer.app.db
-        .prepare('SELECT * FROM workouts WHERE id = ?')
-        .get(body.id);
-      assert.ok(dbWorkout);
-      assert.equal(dbWorkout.day, 15);
+      // Verify persistence by querying the calendar endpoint
+      const getRes = await fetch(`${baseUrl}/api/workouts/calendar?month=1&year=2025`, {
+        headers: { Authorization: `Bearer ${tokenA}` },
+      });
+      const calBody = await getRes.json();
+      const scheduled = calBody.find((w) => w.day === 15);
+      assert.ok(scheduled);
     });
 
     it('should return 409 for duplicate workout', async () => {
@@ -120,7 +121,7 @@ describe('Calendar API', () => {
   describe('DELETE /api/workouts/calendar', () => {
     it('should remove a workout and confirm deletion in database', async () => {
       // Schedule first
-      const createRes = await fetch(`${baseUrl}/api/workouts/calendar`, {
+      await fetch(`${baseUrl}/api/workouts/calendar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +129,6 @@ describe('Calendar API', () => {
         },
         body: JSON.stringify({ day: 20, month: 3, year: 2025 }),
       });
-      const created = await createRes.json();
 
       const res = await fetch(`${baseUrl}/api/workouts/calendar`, {
         method: 'DELETE',
@@ -140,11 +140,13 @@ describe('Calendar API', () => {
       });
       assert.equal(res.status, 204);
 
-      // Verify removal in database
-      const dbWorkout = testServer.app.db
-        .prepare('SELECT * FROM workouts WHERE id = ?')
-        .get(created.id);
-      assert.equal(dbWorkout, undefined);
+      // Verify removal via calendar endpoint
+      const getRes = await fetch(`${baseUrl}/api/workouts/calendar?month=3&year=2025`, {
+        headers: { Authorization: `Bearer ${tokenA}` },
+      });
+      const calBody = await getRes.json();
+      const stillThere = calBody.find((w) => w.day === 20);
+      assert.equal(stillThere, undefined);
     });
 
     it('should return 404 for non-existent workout', async () => {

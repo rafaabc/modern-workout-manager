@@ -13,7 +13,7 @@ export function validateWorkoutDate(day, month, year) {
 
 export function createWorkoutService(workoutRepository) {
   return {
-    getCalendar({ userId, month, year }) {
+    async getCalendar({ userId, month, year }) {
       const validation = validateWorkoutDate(1, month, year);
       if (!validation.valid) {
         const error = new Error(validation.error);
@@ -23,7 +23,7 @@ export function createWorkoutService(workoutRepository) {
       return workoutRepository.findByMonth({ userId, month, year });
     },
 
-    scheduleWorkout({ userId, day, month, year }) {
+    async scheduleWorkout({ userId, day, month, year }) {
       const validation = validateWorkoutDate(day, month, year);
       if (!validation.valid) {
         const error = new Error(validation.error);
@@ -32,9 +32,10 @@ export function createWorkoutService(workoutRepository) {
       }
 
       try {
-        return workoutRepository.create({ userId, day, month, year });
+        return await workoutRepository.create({ userId, day, month, year });
       } catch (err) {
-        if (err.message.includes('UNIQUE')) {
+        // MongoDB duplicate key error code
+        if (err.code === 11000) {
           const error = new Error('Workout already scheduled for this date');
           error.status = 409;
           throw error;
@@ -43,7 +44,7 @@ export function createWorkoutService(workoutRepository) {
       }
     },
 
-    unscheduleWorkout({ userId, day, month, year }) {
+    async unscheduleWorkout({ userId, day, month, year }) {
       const validation = validateWorkoutDate(day, month, year);
       if (!validation.valid) {
         const error = new Error(validation.error);
@@ -51,7 +52,7 @@ export function createWorkoutService(workoutRepository) {
         throw error;
       }
 
-      const removed = workoutRepository.remove({ userId, day, month, year });
+      const removed = await workoutRepository.remove({ userId, day, month, year });
       if (!removed) {
         const error = new Error('Workout not found for this date');
         error.status = 404;

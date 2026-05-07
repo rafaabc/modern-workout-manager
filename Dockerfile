@@ -16,8 +16,6 @@ RUN npm run build --workspace=frontend
 # Stage 2 — Production image
 FROM node:22-alpine
 
-RUN apk add --no-cache python3 make g++
-
 WORKDIR /app
 
 COPY package.json package-lock.json ./

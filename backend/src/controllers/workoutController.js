@@ -1,12 +1,12 @@
 export function createWorkoutController(workoutService) {
   return {
-    getCalendar(req, res) {
+    async getCalendar(req, res) {
       try {
         const month = Number.parseInt(req.query.month, 10);
         const year = Number.parseInt(req.query.year, 10);
         const { userId } = req.user;
 
-        const calendar = workoutService.getCalendar({ userId, month, year });
+        const calendar = await workoutService.getCalendar({ userId, month, year });
         return res.status(200).json(calendar);
       } catch (err) {
         const status = err.status || 500;
@@ -14,12 +14,12 @@ export function createWorkoutController(workoutService) {
       }
     },
 
-    scheduleWorkout(req, res) {
+    async scheduleWorkout(req, res) {
       try {
         const { day, month, year } = req.body;
         const { userId } = req.user;
 
-        const workout = workoutService.scheduleWorkout({ userId, day, month, year });
+        const workout = await workoutService.scheduleWorkout({ userId, day, month, year });
         return res.status(201).json(workout);
       } catch (err) {
         const status = err.status || 500;
@@ -27,12 +27,12 @@ export function createWorkoutController(workoutService) {
       }
     },
 
-    unscheduleWorkout(req, res) {
+    async unscheduleWorkout(req, res) {
       try {
         const { day, month, year } = req.body;
         const { userId } = req.user;
 
-        workoutService.unscheduleWorkout({ userId, day, month, year });
+        await workoutService.unscheduleWorkout({ userId, day, month, year });
         return res.status(204).send();
       } catch (err) {
         const status = err.status || 500;

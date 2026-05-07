@@ -9,8 +9,3 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-    volumes:
-      - db-data:/app/database
-
-volumes:
-  db-data:

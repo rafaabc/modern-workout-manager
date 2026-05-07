@@ -5,21 +5,23 @@ import { createWorkoutService, validateWorkoutDate } from '../../../src/services
 function createMockRepository() {
   const workouts = [];
   return {
-    findByMonth({ userId, month, year }) {
+    async findByMonth({ userId, month, year }) {
       return workouts.filter((w) => w.userId === userId && w.month === month && w.year === year);
     },
-    create({ userId, day, month, year }) {
+    async create({ userId, day, month, year }) {
       const existing = workouts.find(
         (w) => w.userId === userId && w.day === day && w.month === month && w.year === year,
       );
       if (existing) {
-        throw new Error('UNIQUE constraint failed');
+        const err = new Error('Duplicate key error');
+        err.code = 11000; // matches MongoDB duplicate key error code
+        throw err;
       }
-      const workout = { id: workouts.length + 1, userId, day, month, year };
+      const workout = { id: String(workouts.length + 1), userId, day, month, year };
       workouts.push(workout);
       return { id: workout.id, day, month, year };
     },
-    remove({ userId, day, month, year }) {
+    async remove({ userId, day, month, year }) {
       const index = workouts.findIndex(
         (w) => w.userId === userId && w.day === day && w.month === month && w.year === year,
       );
@@ -27,7 +29,7 @@ function createMockRepository() {
       workouts.splice(index, 1);
       return true;
     },
-    countByYear({ userId, year }) {
+    async countByYear({ userId, year }) {
       return workouts.filter((w) => w.userId === userId && w.year === year).length;
     },
   };
@@ -92,22 +94,22 @@ describe('workoutService', () => {
   });
 
   describe('getCalendar', () => {
-    it('should return list of workout days for the month', () => {
-      mockRepo.create({ userId: 1, day: 5, month: 1, year: 2025 });
-      mockRepo.create({ userId: 1, day: 10, month: 1, year: 2025 });
+    it('should return list of workout days for the month', async () => {
+      await mockRepo.create({ userId: '1', day: 5, month: 1, year: 2025 });
+      await mockRepo.create({ userId: '1', day: 10, month: 1, year: 2025 });
 
-      const result = workoutService.getCalendar({ userId: 1, month: 1, year: 2025 });
+      const result = await workoutService.getCalendar({ userId: '1', month: 1, year: 2025 });
       assert.equal(result.length, 2);
     });
 
-    it('should return empty array when no workouts', () => {
-      const result = workoutService.getCalendar({ userId: 1, month: 1, year: 2025 });
+    it('should return empty array when no workouts', async () => {
+      const result = await workoutService.getCalendar({ userId: '1', month: 1, year: 2025 });
       assert.deepEqual(result, []);
     });
 
-    it('should throw 400 for invalid month', () => {
-      assert.throws(
-        () => workoutService.getCalendar({ userId: 1, month: 13, year: 2025 }),
+    it('should throw 400 for invalid month', async () => {
+      await assert.rejects(
+        async () => workoutService.getCalendar({ userId: '1', month: 13, year: 2025 }),
         (err) => {
           assert.equal(err.status, 400);
           return true;
@@ -117,9 +119,9 @@ describe('workoutService', () => {
   });
 
   describe('scheduleWorkout', () => {
-    it('should schedule a workout with valid data', () => {
-      const result = workoutService.scheduleWorkout({
-        userId: 1,
+    it('should schedule a workout with valid data', async () => {
+      const result = await workoutService.scheduleWorkout({
+        userId: '1',
         day: 15,
         month: 1,
         year: 2025,
@@ -130,11 +132,11 @@ describe('workoutService', () => {
       assert.ok(result.id);
     });
 
-    it('should throw 409 for duplicate workout', () => {
-      workoutService.scheduleWorkout({ userId: 1, day: 15, month: 1, year: 2025 });
+    it('should throw 409 for duplicate workout', async () => {
+      await workoutService.scheduleWorkout({ userId: '1', day: 15, month: 1, year: 2025 });
 
-      assert.throws(
-        () => workoutService.scheduleWorkout({ userId: 1, day: 15, month: 1, year: 2025 }),
+      await assert.rejects(
+        async () => workoutService.scheduleWorkout({ userId: '1', day: 15, month: 1, year: 2025 }),
         (err) => {
           assert.equal(err.status, 409);
           assert.match(err.message, /already scheduled/);
@@ -143,9 +145,9 @@ describe('workoutService', () => {
       );
     });
 
-    it('should throw 400 for invalid day', () => {
-      assert.throws(
-        () => workoutService.scheduleWorkout({ userId: 1, day: 0, month: 1, year: 2025 }),
+    it('should throw 400 for invalid day', async () => {
+      await assert.rejects(
+        async () => workoutService.scheduleWorkout({ userId: '1', day: 0, month: 1, year: 2025 }),
         (err) => {
           assert.equal(err.status, 400);
           return true;
@@ -153,9 +155,10 @@ describe('workoutService', () => {
       );
     });
 
-    it('should throw 400 for invalid month', () => {
-      assert.throws(
-        () => workoutService.scheduleWorkout({ userId: 1, day: 15, month: 13, year: 2025 }),
+    it('should throw 400 for invalid month', async () => {
+      await assert.rejects(
+        async () =>
+          workoutService.scheduleWorkout({ userId: '1', day: 15, month: 13, year: 2025 }),
         (err) => {
           assert.equal(err.status, 400);
           return true;
@@ -163,9 +166,10 @@ describe('workoutService', () => {
       );
     });
 
-    it('should throw 400 for invalid year', () => {
-      assert.throws(
-        () => workoutService.scheduleWorkout({ userId: 1, day: 15, month: 1, year: -1 }),
+    it('should throw 400 for invalid year', async () => {
+      await assert.rejects(
+        async () =>
+          workoutService.scheduleWorkout({ userId: '1', day: 15, month: 1, year: -1 }),
         (err) => {
           assert.equal(err.status, 400);
           return true;
@@ -175,10 +179,10 @@ describe('workoutService', () => {
   });
 
   describe('unscheduleWorkout', () => {
-    it('should unschedule an existing workout', () => {
-      workoutService.scheduleWorkout({ userId: 1, day: 15, month: 1, year: 2025 });
-      const result = workoutService.unscheduleWorkout({
-        userId: 1,
+    it('should unschedule an existing workout', async () => {
+      await workoutService.scheduleWorkout({ userId: '1', day: 15, month: 1, year: 2025 });
+      const result = await workoutService.unscheduleWorkout({
+        userId: '1',
         day: 15,
         month: 1,
         year: 2025,
@@ -186,9 +190,10 @@ describe('workoutService', () => {
       assert.equal(result, true);
     });
 
-    it('should throw 404 for non-existent workout', () => {
-      assert.throws(
-        () => workoutService.unscheduleWorkout({ userId: 1, day: 15, month: 1, year: 2025 }),
+    it('should throw 404 for non-existent workout', async () => {
+      await assert.rejects(
+        async () =>
+          workoutService.unscheduleWorkout({ userId: '1', day: 15, month: 1, year: 2025 }),
         (err) => {
           assert.equal(err.status, 404);
           assert.match(err.message, /not found/);
@@ -197,9 +202,10 @@ describe('workoutService', () => {
       );
     });
 
-    it('should throw 400 for invalid date', () => {
-      assert.throws(
-        () => workoutService.unscheduleWorkout({ userId: 1, day: 32, month: 1, year: 2025 }),
+    it('should throw 400 for invalid date', async () => {
+      await assert.rejects(
+        async () =>
+          workoutService.unscheduleWorkout({ userId: '1', day: 32, month: 1, year: 2025 }),
         (err) => {
           assert.equal(err.status, 400);
           return true;

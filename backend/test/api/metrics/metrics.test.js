@@ -84,12 +84,12 @@ describe('Metrics API', () => {
       assert.equal(body.goal, 150);
       assert.equal(body.year, 2025);
 
-      // Verify persistence in database
-      const dbGoal = testServer.app.db
-        .prepare('SELECT * FROM goals WHERE user_id = ?')
-        .get(body.user_id);
-      assert.ok(dbGoal);
-      assert.equal(dbGoal.goal, 150);
+      // Verify persistence by querying metrics endpoint
+      const metricsRes = await fetch(`${baseUrl}/api/metrics?year=2025`, {
+        headers: { Authorization: `Bearer ${tokenA}` },
+      });
+      const metricsBody = await metricsRes.json();
+      assert.equal(metricsBody.goal, 150);
     });
 
     it('should return 400 for invalid goal', async () => {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Full-stack workout management SPA using an **npm workspaces monorepo** with two workspaces: `backend/` (Express + SQLite) and `frontend/` (Vue 3 + Pinia + Vite). JavaScript only — no TypeScript.
+Full-stack workout management SPA using an **npm workspaces monorepo** with two workspaces: `backend/` (Express + MongoDB via Mongoose) and `frontend/` (Vue 3 + Pinia + Vite). JavaScript only — no TypeScript.
 
 ## Commands
 
@@ -81,8 +81,9 @@ database → repository → service → controller → router → app.use()
 
 Each layer is a `createX(deps)` factory returning an object with methods. No classes.
 
-- **`database/database.js`** — SQLite init (WAL mode, foreign keys on), auto-runs migrations from `database/migrations/*.sql` on startup.
-- **`repositories/`** — Raw SQL via better-sqlite3 prepared statements. Data access only.
+- **`database/connection.js`** — Mongoose connection to MongoDB Atlas. Reads `MONGODB_URI` from env; exits process if missing. Registers `error` and `disconnected` event handlers.
+- **`database/models/`** — Mongoose schemas (`User`, `Workout`, `Goal`). Schema definitions are the source of truth for data shape.
+- **`repositories/`** — Mongoose model calls. Data access only; no business logic.
 - **`services/`** — Business logic. `userService` owns password hashing (SHA256 + random salt, timing-safe compare) and JWT signing.
 - **`controllers/`** — HTTP layer. All use `try/catch`; errors with a `.status` property set the response status.
 - **`middleware/authMiddleware.js`** — Verifies JWT, attaches `req.user`.
@@ -104,19 +105,20 @@ Vite dev server proxies `/api/*` to `http://localhost:3000`, so frontend code al
 
 Four-tier pyramid:
 - **Unit** (`backend/test/unit/`) — Mock repositories; test service/validator logic.
-- **Integration** (`backend/test/integration/`) — Real in-memory SQLite; test repository SQL.
+- **Integration** (`backend/test/integration/`) — Real in-memory MongoDB via `mongodb-memory-server`; test repository logic.
 - **API** (`backend/test/api/`) — Real HTTP with `fetch`; test full request/response contracts.
 - **Unit** (`frontend/test/unit/`) — Vitest + Vue Test Utils + jsdom. Mocks `fetch`, `localStorage`, and Vue Router.
+- **API** (`backend/test/api/`) — Real HTTP with `fetch`; test full request/response contracts against in-memory MongoDB.
 - **E2E** (`frontend/e2e/`) — Playwright in real browsers (Chromium, Firefox, WebKit, mobile). Covers auth, calendar, metrics, authorization, and session flows against the running stack.
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` for local development. Backend loads it via `node --env-file=.env`.
+Copy `.env.example` to `.env` (root of the repo) for local development. Backend loads it via `node --env-file=../.env` (path relative to `backend/`).
 
 | Variable | Purpose |
 |---|---|
 | `JWT_SECRET` | JWT signing secret |
-| `DATABASE_PATH` | SQLite file path (auto-creates parent dirs) |
+| `MONGODB_URI` | MongoDB Atlas connection string |
 | `PORT` | HTTP port (default 3000) |
 | `NODE_ENV` | `development` / `production` |
 

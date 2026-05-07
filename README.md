@@ -16,7 +16,7 @@ Built by a QA Engineer exploring generative AI as a development and test automat
 
 `https://modern-workout-manager.onrender.com/`
 
-> SQLite without a persistent disk — data may be lost on restarts.
+> Powered by MongoDB Atlas — data persists across restarts.
 
 https://github.com/user-attachments/assets/08b2e405-632b-4315-8187-bf30558dfee8
 
@@ -28,7 +28,8 @@ https://github.com/user-attachments/assets/08b2e405-632b-4315-8187-bf30558dfee8
 |---|---|
 | Node.js 22+ | Runtime |
 | Express | HTTP framework |
-| better-sqlite3 | SQLite database |
+| Mongoose | MongoDB ODM |
+| MongoDB Atlas | Cloud database |
 | JSON Web Token | Authentication |
 | Swagger UI Express | API documentation |
 | Node.js Test Runner | Test framework |
@@ -58,7 +59,7 @@ modern-workout-manager/
 │   │   ├── services/
 │   │   ├── repositories/
 │   │   ├── middleware/      # JWT auth
-│   │   └── database/        # SQLite init + migrations
+│   │   └── database/        # Mongoose connection + models
 │   └── test/                # unit / integration / api
 ├── frontend/
 │   ├── src/
@@ -80,7 +81,7 @@ modern-workout-manager/
 | Variable | Description | Required |
 |---|---|---|
 | `JWT_SECRET` | JWT signing key | ✅ |
-| `DATABASE_PATH` | SQLite file path | ✅ in production |
+| `MONGODB_URI` | MongoDB Atlas connection string | ✅ |
 | `PORT` | Express port | ❌ (default: 3000) |
 | `NODE_ENV` | Execution environment | ❌ (default: development) |
 
@@ -110,7 +111,7 @@ docker compose up --build -d     # detached
 docker compose down
 ```
 
-App available at `http://localhost:3000`. Data persists via the `db-data` volume.
+App available at `http://localhost:3000`. Requires `MONGODB_URI` set in `.env`.
 
 ## Testing strategy
 
@@ -126,9 +127,9 @@ App available at `http://localhost:3000`. Data persists via the `db-data` volume
 |---|---|---|---|
 | Unit (backend) | Node.js Test Runner | Services, validators | Mocks |
 | Unit (frontend) | Vitest + Vue Test Utils | Components, stores | HTTP mocks |
-| Integration | Node.js Test Runner | Repositories, SQL | SQLite in-memory |
-| API | Node.js Test Runner + fetch | HTTP contracts, JWT | SQLite in-memory |
-| E2E | Playwright | Full user flows in real browsers | Real SQLite |
+| Integration | Node.js Test Runner | Repositories | MongoDB in-memory |
+| API | Node.js Test Runner + fetch | HTTP contracts, JWT | MongoDB in-memory |
+| E2E | Playwright | Full user flows in real browsers | Real MongoDB Atlas |
 
 ```bash
 npm test                          # all (backend + frontend unit)

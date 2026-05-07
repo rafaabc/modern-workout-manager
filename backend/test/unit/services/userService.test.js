@@ -6,11 +6,11 @@ import { randomPassword, randomSecret } from '../../helpers/testCredentials.js';
 function createMockRepository() {
   const users = [];
   return {
-    findByUsername(username) {
+    async findByUsername(username) {
       return users.find((u) => u.username === username);
     },
-    create({ username, password }) {
-      const user = { id: users.length + 1, username, password };
+    async create({ username, password }) {
+      const user = { id: String(users.length + 1), username, password };
       users.push(user);
       return { id: user.id, username: user.username };
     },
@@ -48,17 +48,17 @@ describe('userService', () => {
   });
 
   describe('register', () => {
-    it('should register a user successfully', () => {
-      const result = userService.register({ username: 'john', password: validPassword });
-      assert.equal(result.id, 1);
+    it('should register a user successfully', async () => {
+      const result = await userService.register({ username: 'john', password: validPassword });
+      assert.ok(result.id);
       assert.equal(result.username, 'john');
     });
 
-    it('should throw 409 for duplicate username', () => {
-      userService.register({ username: 'john', password: validPassword });
+    it('should throw 409 for duplicate username', async () => {
+      await userService.register({ username: 'john', password: validPassword });
 
-      assert.throws(
-        () => userService.register({ username: 'john', password: anotherPassword }),
+      await assert.rejects(
+        async () => userService.register({ username: 'john', password: anotherPassword }),
         (err) => {
           assert.equal(err.status, 409);
           assert.equal(err.message, 'Username already exists');
@@ -67,9 +67,9 @@ describe('userService', () => {
       );
     });
 
-    it('should throw 400 for password shorter than 8 characters', () => {
-      assert.throws(
-        () => userService.register({ username: 'john', password: tooShort }),
+    it('should throw 400 for password shorter than 8 characters', async () => {
+      await assert.rejects(
+        async () => userService.register({ username: 'john', password: tooShort }),
         (err) => {
           assert.equal(err.status, 400);
           assert.match(err.message, /at least 8 characters/);
@@ -78,9 +78,9 @@ describe('userService', () => {
       );
     });
 
-    it('should throw 400 for password without numbers', () => {
-      assert.throws(
-        () => userService.register({ username: 'john', password: noDigits }),
+    it('should throw 400 for password without numbers', async () => {
+      await assert.rejects(
+        async () => userService.register({ username: 'john', password: noDigits }),
         (err) => {
           assert.equal(err.status, 400);
           assert.match(err.message, /at least one number/);
@@ -89,9 +89,9 @@ describe('userService', () => {
       );
     });
 
-    it('should throw 400 for invalid username', () => {
-      assert.throws(
-        () => userService.register({ username: 'ab', password: validPassword }),
+    it('should throw 400 for invalid username', async () => {
+      await assert.rejects(
+        async () => userService.register({ username: 'ab', password: validPassword }),
         (err) => {
           assert.equal(err.status, 400);
           assert.match(err.message, /at least 3 characters/);
@@ -102,20 +102,20 @@ describe('userService', () => {
   });
 
   describe('login', () => {
-    beforeEach(() => {
-      userService.register({ username: 'john', password: validPassword });
+    beforeEach(async () => {
+      await userService.register({ username: 'john', password: validPassword });
     });
 
-    it('should return a JWT token for valid credentials', () => {
-      const result = userService.login({ username: 'john', password: validPassword });
+    it('should return a JWT token for valid credentials', async () => {
+      const result = await userService.login({ username: 'john', password: validPassword });
       assert.ok(result.token);
       assert.equal(typeof result.token, 'string');
       assert.ok(result.token.split('.').length === 3);
     });
 
-    it('should throw 401 for incorrect password', () => {
-      assert.throws(
-        () => userService.login({ username: 'john', password: wrongPassword }),
+    it('should throw 401 for incorrect password', async () => {
+      await assert.rejects(
+        async () => userService.login({ username: 'john', password: wrongPassword }),
         (err) => {
           assert.equal(err.status, 401);
           assert.equal(err.message, 'Invalid credentials');
@@ -124,9 +124,9 @@ describe('userService', () => {
       );
     });
 
-    it('should throw 401 for non-existent username', () => {
-      assert.throws(
-        () => userService.login({ username: 'unknown', password: validPassword }),
+    it('should throw 401 for non-existent username', async () => {
+      await assert.rejects(
+        async () => userService.login({ username: 'unknown', password: validPassword }),
         (err) => {
           assert.equal(err.status, 401);
           assert.equal(err.message, 'Invalid credentials');
@@ -137,15 +137,15 @@ describe('userService', () => {
   });
 
   describe('JWT_SECRET', () => {
-    it('should throw error when JWT_SECRET is not defined', () => {
+    it('should throw error when JWT_SECRET is not defined', async () => {
       const savedSecret = process.env.JWT_SECRET;
       delete process.env.JWT_SECRET;
 
       try {
-        userService.register({ username: 'john', password: validPassword });
+        await userService.register({ username: 'john', password: validPassword });
 
-        assert.throws(
-          () => userService.login({ username: 'john', password: validPassword }),
+        await assert.rejects(
+          async () => userService.login({ username: 'john', password: validPassword }),
           (err) => {
             assert.match(err.message, /JWT_SECRET/);
             return true;
