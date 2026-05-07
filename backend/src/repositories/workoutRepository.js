@@ -6,8 +6,8 @@ export function createWorkoutRepository() {
     async findByMonth({ userId, month, year }) {
       const docs = await Workout.find({
         userId: new mongoose.Types.ObjectId(userId),
-        month,
-        year,
+        month: Number(month),
+        year: Number(year),
       })
         .sort({ day: 1 })
         .lean();
@@ -17,9 +17,9 @@ export function createWorkoutRepository() {
     async create({ userId, day, month, year }) {
       const doc = await Workout.create({
         userId: new mongoose.Types.ObjectId(userId),
-        day,
-        month,
-        year,
+        day: Number(day),
+        month: Number(month),
+        year: Number(year),
       });
       return { id: doc._id.toString(), day: doc.day, month: doc.month, year: doc.year };
     },
@@ -27,20 +27,20 @@ export function createWorkoutRepository() {
     async remove({ userId, day, month, year }) {
       const result = await Workout.deleteOne({
         userId: new mongoose.Types.ObjectId(userId),
-        day,
-        month,
-        year,
+        day: Number(day),
+        month: Number(month),
+        year: Number(year),
       });
       return result.deletedCount > 0;
     },
 
     async countByYear({ userId, year }) {
-      return Workout.countDocuments({ userId: new mongoose.Types.ObjectId(userId), year });
+      return Workout.countDocuments({ userId: new mongoose.Types.ObjectId(userId), year: Number(year) });
     },
 
     async countByYearGrouped({ userId, year }) {
       const results = await Workout.aggregate([
-        { $match: { userId: new mongoose.Types.ObjectId(userId), year } },
+        { $match: { userId: new mongoose.Types.ObjectId(userId), year: Number(year) } },
         { $group: { _id: '$month', count: { $sum: 1 } } },
         { $sort: { _id: 1 } },
       ]);
