@@ -8,7 +8,7 @@
 
 ## Description
 
-Full-stack workout management app. Users can register, schedule workouts on a monthly calendar, track annual metrics, and set workout goals.
+Full-stack workout management app — installable as a PWA on Android and iOS. Users can register, schedule workouts on a monthly calendar, track annual metrics, and set workout goals.
 
 Built by a QA Engineer exploring generative AI as a development and test automation tool — from architecture to CI/CD, with unit, integration, API, and E2E tests at ≥ 95% coverage.
 
@@ -43,6 +43,7 @@ https://github.com/user-attachments/assets/08b2e405-632b-4315-8187-bf30558dfee8
 | Vue Router | SPA routing |
 | Tailwind CSS | Styling |
 | Vite | Build tool |
+| vite-plugin-pwa | PWA — service worker + web manifest |
 | Vitest | Unit tests |
 | Playwright | E2E tests |
 
@@ -84,6 +85,7 @@ modern-workout-manager/
 | `MONGODB_URI` | MongoDB Atlas connection string | ✅ |
 | `PORT` | Express port | ❌ (default: 3000) |
 | `NODE_ENV` | Execution environment | ❌ (default: development) |
+| `VITE_API_BASE_URL` | Backend URL for separate deployments (e.g. `https://api.example.com`). Leave empty when backend serves frontend (monolith). | ❌ |
 
 ## Running in development
 
@@ -102,6 +104,22 @@ npm run start:frontend
 ```
 
 Frontend: `http://localhost:5173` — API: `http://localhost:3000` — Swagger: `http://localhost:3000/api-docs`
+
+## Installing as an app (PWA)
+
+The app is a Progressive Web App — no app store required.
+
+**Android (Chrome):** open the live URL → tap the menu → "Add to Home screen"
+
+**iOS (Safari):** open the live URL → tap Share → "Add to Home Screen"
+
+Once installed, the app opens full-screen with its own icon, like a native app. The service worker precaches all static assets so the shell loads instantly even on slow connections.
+
+To regenerate icons after editing `frontend/public/favicon.svg`:
+
+```bash
+npm --workspace=frontend run generate-pwa-assets
+```
 
 ## Running in production (Docker Compose)
 

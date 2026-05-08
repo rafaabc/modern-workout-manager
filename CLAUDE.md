@@ -101,6 +101,8 @@ Vue 3 Composition API throughout. Entry: `main.js` → mounts `App.vue` with Pin
 
 Vite dev server proxies `/api/*` to `http://localhost:3000`, so frontend code always calls `/api/...` paths.
 
+The app is a **PWA** (Progressive Web App) — installable on Android and iOS via "Add to Home Screen". `vite-plugin-pwa` generates the service worker and web manifest at build time. Icons live in `frontend/public/`; regenerate them with `npm --workspace=frontend run generate-pwa-assets` after editing `frontend/public/favicon.svg`.
+
 ### Testing Strategy
 
 Four-tier pyramid:
@@ -121,5 +123,6 @@ Copy `.env.example` to `.env` (root of the repo) for local development. Backend 
 | `MONGODB_URI` | MongoDB Atlas connection string |
 | `PORT` | HTTP port (default 3000) |
 | `NODE_ENV` | `development` / `production` |
+| `VITE_API_BASE_URL` | Frontend only. Empty = monolith (backend serves frontend). Set to backend URL for separate deployments (e.g. `https://api.example.com`) |
 
 Frontend: `VITE_INACTIVITY_TIMEOUT_MS` overrides the 15-min session timeout.
