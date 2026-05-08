@@ -14,7 +14,8 @@ async function request(method, path, body) {
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(path, options);
+  const base = import.meta.env.VITE_API_BASE_URL ?? '';
+  const response = await fetch(`${base}${path}`, options);
 
   if (response.status === 401) {
     authStore.logout();
