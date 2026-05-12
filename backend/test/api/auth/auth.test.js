@@ -179,6 +179,7 @@ describe('Auth API', () => {
       assert.ok(body.token);
     });
 
+    // Tests 4-6 run after test 1 has changed the password to newValidPassword
     it('should return 401 when no token is provided', async () => {
       const res = await fetch(`${baseUrl}/api/users/password`, {
         method: 'PATCH',
