@@ -65,4 +65,21 @@ describe('userRepository', () => {
       assert.equal(user, undefined);
     });
   });
+
+  describe('updatePassword', () => {
+    it('should update the stored password hash', async () => {
+      const original = randomHash();
+      const updated = randomHash();
+      await userRepository.create({ username: 'john', password: original });
+
+      await userRepository.updatePassword('john', updated);
+
+      const user = await userRepository.findByUsername('john');
+      assert.equal(user.password, updated);
+    });
+
+    it('should do nothing when username does not exist', async () => {
+      await assert.doesNotReject(() => userRepository.updatePassword('nobody', randomHash()));
+    });
+  });
 });
