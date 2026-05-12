@@ -245,6 +245,21 @@ describe('userService', () => {
       );
     });
 
+    it('should throw 400 when username is missing', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: undefined,
+            currentPassword: validPassword,
+            newPassword: anotherPassword,
+          }),
+        (err) => {
+          assert.equal(err.status, 400);
+          return true;
+        },
+      );
+    });
+
     it('should throw 404 when user does not exist', async () => {
       await assert.rejects(
         () =>

@@ -83,6 +83,13 @@ export function createUserService(userRepository) {
     },
 
     async changePassword({ username, currentPassword, newPassword }) {
+      const usernameValidation = validateUsername(username);
+      if (!usernameValidation.valid) {
+        const error = new Error(usernameValidation.error);
+        error.status = 400;
+        throw error;
+      }
+
       const passwordValidation = validatePassword(newPassword);
       if (!passwordValidation.valid) {
         const error = new Error(passwordValidation.error);
