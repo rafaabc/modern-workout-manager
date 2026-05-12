@@ -75,7 +75,7 @@
         >
           {{
             successMessage
-              ? t('register.redirecting')
+              ? t('changePassword.redirecting')
               : isSubmitting
                 ? t('changePassword.changingPassword')
                 : t('changePassword.submit')
@@ -124,6 +124,10 @@ function validate() {
   }
   if (newPassword.value !== confirmNewPassword.value) {
     error.value = t('validation.passwordsDoNotMatch');
+    return false;
+  }
+  if (newPassword.value === currentPassword.value) {
+    error.value = t('validation.newPasswordSameAsCurrent');
     return false;
   }
   return true;

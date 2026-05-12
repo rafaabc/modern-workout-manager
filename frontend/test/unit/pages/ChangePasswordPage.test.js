@@ -71,6 +71,22 @@ describe('ChangePasswordPage', () => {
     expect(wrapper.find('.error').text()).toBe('Passwords do not match');
   });
 
+  it('blocks submit when new password equals current password', async () => {
+    const wrapper = mountPage();
+    const authStore = useAuthStore();
+    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+
+    await wrapper.find('#username').setValue('testuser');
+    await wrapper.find('#current-password').setValue(pwd);
+    await wrapper.find('#new-password').setValue(pwd);
+    await wrapper.find('#confirm-new-password').setValue(pwd);
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(authStore.changePassword).not.toHaveBeenCalled();
+    expect(wrapper.find('.error').text()).toBe('New password must be different from current password');
+  });
+
   it('blocks submit when new password is too short', async () => {
     const wrapper = mountPage();
     const authStore = useAuthStore();
