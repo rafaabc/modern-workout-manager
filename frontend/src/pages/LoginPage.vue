@@ -10,7 +10,7 @@
         leave-from-class="opacity-100 translate-y-0"
         leave-to-class="opacity-0 -translate-y-2"
       >
-        <div v-if="showRegisteredMessage || showLoggedOutMessage">
+        <div v-if="showRegisteredMessage || showLoggedOutMessage || showPasswordChangedMessage">
           <div
             v-if="showRegisteredMessage"
             class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 relative"
@@ -33,6 +33,19 @@
               @click="closeLoggedOut"
               aria-label="Fechar mensagem de logout"
               class="absolute right-3 top-1.5 text-indigo-200 hover:text-white font-bold text-lg leading-none"
+            >
+              &times;
+            </button>
+          </div>
+          <div
+            v-if="showPasswordChangedMessage"
+            class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 relative"
+          >
+            <div class="text-center">{{ t('login.passwordChanged') }}</div>
+            <button
+              @click="closePasswordChanged"
+              aria-label="Fechar mensagem de senha alterada"
+              class="absolute right-3 top-1.5 text-emerald-200 hover:text-white font-bold text-lg leading-none"
             >
               &times;
             </button>
@@ -78,6 +91,12 @@
           t('auth.register')
         }}</router-link>
       </p>
+      <p class="mt-2 text-center text-gray-400 text-sm">
+        {{ t('login.forgotPassword') }}
+        <router-link to="/change-password" class="text-indigo-400 hover:text-indigo-300 transition">{{
+          t('login.changeIt')
+        }}</router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -104,6 +123,9 @@ showLoggedOutMessage.value = route.query.loggedOut === '1';
 let registeredTimer;
 let loggedOutTimer;
 
+const showPasswordChangedMessage = ref(route.query.passwordChanged === '1');
+let passwordChangedTimer;
+
 onMounted(() => {
   // Capture query params when arriving at the page and remove them from the URL
   if (showRegisteredMessage.value) {
@@ -124,11 +146,21 @@ onMounted(() => {
       router.replace({ query: q }).catch(() => {});
     }, 3000);
   }
+
+  if (showPasswordChangedMessage.value) {
+    passwordChangedTimer = setTimeout(() => {
+      showPasswordChangedMessage.value = false;
+      const q = { ...route.query };
+      delete q.passwordChanged;
+      router.replace({ query: q }).catch(() => {});
+    }, 3000);
+  }
 });
 
 onBeforeUnmount(() => {
   clearTimeout(registeredTimer);
   clearTimeout(loggedOutTimer);
+  clearTimeout(passwordChangedTimer);
 });
 
 function closeRegistered() {
@@ -144,6 +176,14 @@ function closeLoggedOut() {
   showLoggedOutMessage.value = false;
   const q = { ...route.query };
   delete q.loggedOut;
+  router.replace({ query: q }).catch(() => {});
+}
+
+function closePasswordChanged() {
+  clearTimeout(passwordChangedTimer);
+  showPasswordChangedMessage.value = false;
+  const q = { ...route.query };
+  delete q.passwordChanged;
   router.replace({ query: q }).catch(() => {});
 }
 

@@ -13,6 +13,7 @@ function createTestRouter() {
       { path: '/login', component: LoginPage },
       { path: '/', component: { template: '<div>Dashboard</div>' } },
       { path: '/register', component: { template: '<div>Register</div>' } },
+      { path: '/change-password', component: { template: '<div>ChangePassword</div>' } },
     ],
   });
 }
@@ -176,6 +177,49 @@ describe('LoginPage', () => {
 
     expect(wrapper.text()).not.toContain('Logged out successfully');
     expect(router.currentRoute.value.query.loggedOut).toBeUndefined();
+    vi.useRealTimers();
+  });
+
+  it('has a link to /change-password', () => {
+    const wrapper = mountLoginPage();
+    expect(wrapper.find('a[href="/change-password"]').exists()).toBe(true);
+  });
+
+  it('shows password changed message when arriving with ?passwordChanged=1', async () => {
+    await router.push({ path: '/login', query: { passwordChanged: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    expect(wrapper.text()).toContain('Password changed successfully. You can now sign in.');
+  });
+
+  it('password changed message can be dismissed with close button', async () => {
+    await router.push({ path: '/login', query: { passwordChanged: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de senha alterada"]');
+    expect(closeBtn.exists()).toBe(true);
+
+    await closeBtn.trigger('click');
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain('Password changed successfully. You can now sign in.');
+  });
+
+  it('password changed message is removed after timeout and query param cleared', async () => {
+    vi.useFakeTimers();
+    await router.push({ path: '/login', query: { passwordChanged: '1' } });
+    await router.isReady();
+
+    const wrapper = mountLoginPage();
+    expect(wrapper.text()).toContain('Password changed successfully. You can now sign in.');
+
+    vi.advanceTimersByTime(3000);
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain('Password changed successfully. You can now sign in.');
+    expect(router.currentRoute.value.query.passwordChanged).toBeUndefined();
     vi.useRealTimers();
   });
 });
