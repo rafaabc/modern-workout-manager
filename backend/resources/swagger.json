@@ -138,6 +138,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LogoutResponse"
+                },
+                "example": {
+                  "message": "Password updated successfully"
                 }
               }
             }

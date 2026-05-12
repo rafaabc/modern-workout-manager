@@ -244,6 +244,22 @@ describe('userService', () => {
         },
       );
     });
+
+    it('should throw 404 when user does not exist', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'nonexistent',
+            currentPassword: validPassword,
+            newPassword: anotherPassword,
+          }),
+        (err) => {
+          assert.equal(err.status, 404);
+          assert.equal(err.message, 'User not found');
+          return true;
+        },
+      );
+    });
   });
 
   describe('JWT_SECRET', () => {
