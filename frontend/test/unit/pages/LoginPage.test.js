@@ -185,19 +185,19 @@ describe('LoginPage', () => {
     expect(wrapper.find('a[href="/change-password"]').exists()).toBe(true);
   });
 
-  it('shows password changed message when arriving with ?passwordChanged=1', async () => {
+  async function mountWithPasswordChanged() {
     await router.push({ path: '/login', query: { passwordChanged: '1' } });
     await router.isReady();
+    return mountLoginPage();
+  }
 
-    const wrapper = mountLoginPage();
+  it('shows password changed message when arriving with ?passwordChanged=1', async () => {
+    const wrapper = await mountWithPasswordChanged();
     expect(wrapper.text()).toContain('Password changed successfully. You can now sign in.');
   });
 
   it('password changed message can be dismissed with close button', async () => {
-    await router.push({ path: '/login', query: { passwordChanged: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
+    const wrapper = await mountWithPasswordChanged();
     const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de senha alterada"]');
     expect(closeBtn.exists()).toBe(true);
 
@@ -209,10 +209,7 @@ describe('LoginPage', () => {
 
   it('password changed message is removed after timeout and query param cleared', async () => {
     vi.useFakeTimers();
-    await router.push({ path: '/login', query: { passwordChanged: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
+    const wrapper = await mountWithPasswordChanged();
     expect(wrapper.text()).toContain('Password changed successfully. You can now sign in.');
 
     vi.advanceTimersByTime(3000);

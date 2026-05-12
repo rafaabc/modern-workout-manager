@@ -46,6 +46,22 @@ describe('ChangePasswordPage', () => {
     });
   }
 
+  function mountWithSpy() {
+    const wrapper = mountPage();
+    const authStore = useAuthStore();
+    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    return { wrapper, authStore };
+  }
+
+  async function fillAndSubmit(wrapper, { currentPwd = pwd, newPassword = newPwd, confirmPassword = newPwd } = {}) {
+    await wrapper.find('#username').setValue('testuser');
+    await wrapper.find('#current-password').setValue(currentPwd);
+    await wrapper.find('#new-password').setValue(newPassword);
+    await wrapper.find('#confirm-new-password').setValue(confirmPassword);
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+  }
+
   it('renders all four fields and submit button', () => {
     const wrapper = mountPage();
     expect(wrapper.find('#username').exists()).toBe(true);
@@ -56,80 +72,45 @@ describe('ChangePasswordPage', () => {
   });
 
   it('blocks submit when passwords do not match', async () => {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    const { wrapper, authStore } = mountWithSpy();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(newPwd);
-    await wrapper.find('#confirm-new-password').setValue('Different1x9');
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper, { confirmPassword: 'Different1x9' });
 
     expect(authStore.changePassword).not.toHaveBeenCalled();
     expect(wrapper.find('.error').text()).toBe('Passwords do not match');
   });
 
   it('blocks submit when new password equals current password', async () => {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    const { wrapper, authStore } = mountWithSpy();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(pwd);
-    await wrapper.find('#confirm-new-password').setValue(pwd);
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper, { newPassword: pwd, confirmPassword: pwd });
 
     expect(authStore.changePassword).not.toHaveBeenCalled();
     expect(wrapper.find('.error').text()).toBe('New password must be different from current password');
   });
 
   it('blocks submit when new password is too short', async () => {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    const { wrapper, authStore } = mountWithSpy();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue('Short1');
-    await wrapper.find('#confirm-new-password').setValue('Short1');
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper, { newPassword: 'Short1', confirmPassword: 'Short1' });
 
     expect(authStore.changePassword).not.toHaveBeenCalled();
     expect(wrapper.find('.error').text()).toBe('Password must be at least 8 characters');
   });
 
   it('blocks submit when new password has no numbers', async () => {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    const { wrapper, authStore } = mountWithSpy();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue('abcdefgh');
-    await wrapper.find('#confirm-new-password').setValue('abcdefgh');
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper, { newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' });
 
     expect(authStore.changePassword).not.toHaveBeenCalled();
     expect(wrapper.find('.error').text()).toBe('Password must contain letters and numbers');
   });
 
   it('calls authStore.changePassword with correct values on valid submit', async () => {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    const { wrapper, authStore } = mountWithSpy();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(newPwd);
-    await wrapper.find('#confirm-new-password').setValue(newPwd);
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper);
 
     expect(authStore.changePassword).toHaveBeenCalledWith({
       username: 'testuser',
@@ -139,16 +120,9 @@ describe('ChangePasswordPage', () => {
   });
 
   it('shows success feedback then redirects to /login?passwordChanged=1', async () => {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
+    const { wrapper } = mountWithSpy();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(newPwd);
-    await wrapper.find('#confirm-new-password').setValue(newPwd);
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper);
 
     expect(wrapper.find('.success').exists()).toBe(true);
     expect(router.currentRoute.value.path).toBe('/change-password');
@@ -165,12 +139,7 @@ describe('ChangePasswordPage', () => {
     const authStore = useAuthStore();
     vi.spyOn(authStore, 'changePassword').mockRejectedValue(new Error('User not found'));
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(newPwd);
-    await wrapper.find('#confirm-new-password').setValue(newPwd);
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper);
 
     expect(wrapper.find('.error').text()).toBe('User not found');
   });
@@ -183,12 +152,7 @@ describe('ChangePasswordPage', () => {
       () => new Promise((r) => { resolveChange = r; }),
     );
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(newPwd);
-    await wrapper.find('#confirm-new-password').setValue(newPwd);
-    wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper);
 
     expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeDefined();
 
@@ -207,12 +171,7 @@ describe('ChangePasswordPage', () => {
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
     vi.spyOn(authStore, 'changePassword').mockResolvedValue();
 
-    await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(pwd);
-    await wrapper.find('#new-password').setValue(newPwd);
-    await wrapper.find('#confirm-new-password').setValue(newPwd);
-    await wrapper.find('form').trigger('submit');
-    await flushPromises();
+    await fillAndSubmit(wrapper);
 
     wrapper.unmount();
     expect(clearTimeoutSpy).toHaveBeenCalled();
