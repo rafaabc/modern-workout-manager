@@ -1,50 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mount, flushPromises } from '@vue/test-utils';
-import { createPinia, setActivePinia } from 'pinia';
-import { createRouter, createMemoryHistory } from 'vue-router';
+import { flushPromises } from '@vue/test-utils';
 import RegisterPage from '../../../src/pages/RegisterPage.vue';
 import { useAuthStore } from '../../../src/stores/authStore.js';
-import { testPassword } from '../../helpers/testCredentials.js';
-
-function createTestRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/register', component: RegisterPage },
-      { path: '/login', component: { template: '<div>Login</div>' } },
-      { path: '/', component: { template: '<div>Dashboard</div>' } },
-    ],
-  });
-}
+import { createPageSetup } from '../../helpers/createPageSetup.js';
 
 describe('RegisterPage', () => {
-  let pinia;
-  let router;
-  let pwd;
+  const { ctx, setup, teardown, mountPage } = createPageSetup(RegisterPage, '/register', [
+    { path: '/', component: { template: '<div>Dashboard</div>' } },
+  ]);
 
   beforeEach(async () => {
-    pwd = testPassword();
-    pinia = createPinia();
-    setActivePinia(pinia);
-    router = createTestRouter();
-    router.push('/register');
-    await router.isReady();
-    localStorage.clear();
-    vi.restoreAllMocks();
-    vi.useFakeTimers();
+    await setup();
   });
 
-  afterEach(() => {
-    vi.runOnlyPendingTimers();
-    vi.useRealTimers();
-  });
+  afterEach(teardown);
 
   function mountRegisterPage() {
-    return mount(RegisterPage, {
-      global: {
-        plugins: [pinia, router],
-      },
-    });
+    return mountPage();
   }
 
   it('blocks submit when username is too short', async () => {
@@ -53,7 +25,7 @@ describe('RegisterPage', () => {
     vi.spyOn(authStore, 'register').mockResolvedValue();
 
     await wrapper.find('#username').setValue('ab');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
@@ -95,13 +67,13 @@ describe('RegisterPage', () => {
     vi.spyOn(authStore, 'register').mockResolvedValue({ id: 1, username: 'newuser' });
 
     await wrapper.find('#username').setValue('newuser');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
     expect(authStore.register).toHaveBeenCalledWith({
       username: 'newuser',
-      password: pwd,
+      password: ctx.pwd,
     });
   });
 
@@ -111,7 +83,7 @@ describe('RegisterPage', () => {
     vi.spyOn(authStore, 'register').mockRejectedValue(new Error('Username already exists'));
 
     await wrapper.find('#username').setValue('existing');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
@@ -124,20 +96,20 @@ describe('RegisterPage', () => {
     vi.spyOn(authStore, 'register').mockResolvedValue({ id: 1, username: 'newuser' });
 
     await wrapper.find('#username').setValue('newuser');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
     expect(wrapper.find('.success').text()).toContain('Registration successful.');
     expect(wrapper.find('button').text()).toBe('Redirecting...');
     expect(wrapper.find('button').attributes('disabled')).toBeDefined();
-    expect(router.currentRoute.value.path).toBe('/register');
+    expect(ctx.router.currentRoute.value.path).toBe('/register');
 
     vi.advanceTimersByTime(1400);
     await flushPromises();
 
-    expect(router.currentRoute.value.path).toBe('/login');
-    expect(router.currentRoute.value.query.registered).toBe('1');
+    expect(ctx.router.currentRoute.value.path).toBe('/login');
+    expect(ctx.router.currentRoute.value.query.registered).toBe('1');
   });
 
   it('clears the pending redirect timer when the page is unmounted', async () => {
@@ -147,7 +119,7 @@ describe('RegisterPage', () => {
     vi.spyOn(authStore, 'register').mockResolvedValue({ id: 1, username: 'newuser' });
 
     await wrapper.find('#username').setValue('newuser');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
