@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
 import LoginPage from '../pages/LoginPage.vue';
 import RegisterPage from '../pages/RegisterPage.vue';
+import ChangePasswordPage from '../pages/ChangePasswordPage.vue';
 
 const routes = [
   {
@@ -14,6 +15,12 @@ const routes = [
     path: '/register',
     name: 'register',
     component: RegisterPage,
+    meta: { public: true },
+  },
+  {
+    path: '/change-password',
+    name: 'change-password',
+    component: ChangePasswordPage,
     meta: { public: true },
   },
   {

@@ -52,4 +52,17 @@ describe('Router navigation guards', () => {
     await router.push('/');
     expect(router.currentRoute.value.path).toBe('/');
   });
+
+  it('allows access to /change-password when not authenticated', async () => {
+    await router.push('/change-password');
+    expect(router.currentRoute.value.path).toBe('/change-password');
+  });
+
+  it('redirects to / when accessing /change-password while authenticated', async () => {
+    const authStore = useAuthStore();
+    authStore.token = 'valid-token';
+
+    await router.push('/change-password');
+    expect(router.currentRoute.value.path).toBe('/');
+  });
 });
