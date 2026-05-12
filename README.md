@@ -71,8 +71,6 @@ modern-workout-manager/
 │   │   └── stores/          # auth, calendar, metrics
 │   ├── e2e/                 # Playwright tests + Page Objects
 │   └── test/unit/
-├── Dockerfile
-├── docker-compose.yml
 ├── package.json             # npm workspaces root
 └── .env.example
 ```
@@ -121,16 +119,6 @@ To regenerate icons after editing `frontend/public/favicon.svg`:
 ```bash
 npm --workspace=frontend run generate-pwa-assets
 ```
-
-## Running in production (Docker Compose)
-
-```bash
-docker compose up --build        # foreground
-docker compose up --build -d     # detached
-docker compose down
-```
-
-App available at `http://localhost:3000`. Requires `MONGODB_URI` set in `.env`.
 
 ## Testing strategy
 
