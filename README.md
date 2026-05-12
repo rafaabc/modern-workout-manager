@@ -85,6 +85,7 @@ modern-workout-manager/
 | `MONGODB_URI` | MongoDB Atlas connection string | ✅ |
 | `PORT` | Express port | ❌ (default: 3000) |
 | `NODE_ENV` | Execution environment | ❌ (default: development) |
+| `FRONTEND_URL` | Frontend origin allowed by backend CORS (e.g. `https://your-app.vercel.app`). Required when frontend and backend are deployed separately. | ❌ |
 | `VITE_API_BASE_URL` | Backend URL for separate deployments (e.g. `https://api.example.com`). Leave empty when backend serves frontend (monolith). | ❌ |
 
 ## Running in development
@@ -170,7 +171,7 @@ npx --prefix frontend playwright install
 | POST | `/api/users/register` | No | Register user |
 | POST | `/api/users/login` | No | Login (returns JWT) |
 | POST | `/api/users/logout` | No | Logout |
-| PATCH | `/api/users/password` | JWT | Change password |
+| PATCH | `/api/users/password` | No | Change password (username + newPassword in body) |
 | GET | `/api/workouts/calendar` | JWT | Get monthly calendar (`?month=&year=`) |
 | POST | `/api/workouts/calendar` | JWT | Schedule a workout |
 | DELETE | `/api/workouts/calendar` | JWT | Remove a workout |

@@ -123,6 +123,7 @@ Copy `.env.example` to `.env` (root of the repo) for local development. Backend 
 | `MONGODB_URI` | MongoDB Atlas connection string |
 | `PORT` | HTTP port (default 3000) |
 | `NODE_ENV` | `development` / `production` |
+| `FRONTEND_URL` | Frontend origin allowed by backend CORS. Required when deploying frontend and backend separately (e.g. `https://your-app.vercel.app`) |
 | `VITE_API_BASE_URL` | Frontend only. Empty = monolith (backend serves frontend). Set to backend URL for separate deployments (e.g. `https://api.example.com`) |
 
 Frontend: `VITE_INACTIVITY_TIMEOUT_MS` overrides the 15-min session timeout.
