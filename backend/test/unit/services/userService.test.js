@@ -149,7 +149,6 @@ describe('userService', () => {
       await assert.doesNotReject(() =>
         userService.changePassword({
           username: 'john',
-          currentPassword: validPassword,
           newPassword: anotherPassword,
         }),
       );
@@ -158,7 +157,6 @@ describe('userService', () => {
     it('should allow login with new password after change', async () => {
       await userService.changePassword({
         username: 'john',
-        currentPassword: validPassword,
         newPassword: anotherPassword,
       });
 
@@ -169,7 +167,6 @@ describe('userService', () => {
     it('should reject login with old password after change', async () => {
       await userService.changePassword({
         username: 'john',
-        currentPassword: validPassword,
         newPassword: anotherPassword,
       });
 
@@ -182,28 +179,11 @@ describe('userService', () => {
       );
     });
 
-    it('should throw 401 for wrong current password', async () => {
-      await assert.rejects(
-        () =>
-          userService.changePassword({
-            username: 'john',
-            currentPassword: wrongPassword,
-            newPassword: anotherPassword,
-          }),
-        (err) => {
-          assert.equal(err.status, 401);
-          assert.equal(err.message, 'Invalid credentials');
-          return true;
-        },
-      );
-    });
-
     it('should throw 400 for new password shorter than 8 characters', async () => {
       await assert.rejects(
         () =>
           userService.changePassword({
             username: 'john',
-            currentPassword: validPassword,
             newPassword: 'Short1',
           }),
         (err) => {
@@ -219,7 +199,6 @@ describe('userService', () => {
         () =>
           userService.changePassword({
             username: 'john',
-            currentPassword: validPassword,
             newPassword: 'NoNumbers',
           }),
         (err) => {
@@ -235,7 +214,6 @@ describe('userService', () => {
         () =>
           userService.changePassword({
             username: 'john',
-            currentPassword: validPassword,
             newPassword: undefined,
           }),
         (err) => {
@@ -250,7 +228,6 @@ describe('userService', () => {
         () =>
           userService.changePassword({
             username: undefined,
-            currentPassword: validPassword,
             newPassword: anotherPassword,
           }),
         (err) => {
@@ -265,7 +242,6 @@ describe('userService', () => {
         () =>
           userService.changePassword({
             username: 'nonexistent',
-            currentPassword: validPassword,
             newPassword: anotherPassword,
           }),
         (err) => {

@@ -14,19 +14,18 @@ describe('ChangePasswordPage', () => {
     newPwd = testPassword();
   });
 
-  async function fillAndSubmit(wrapper, { currentPwd = ctx.pwd, newPassword = newPwd, confirmPassword = newPwd } = {}) {
+  async function fillAndSubmit(wrapper, { newPassword = newPwd, confirmPassword = newPwd } = {}) {
     await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#current-password').setValue(currentPwd);
     await wrapper.find('#new-password').setValue(newPassword);
     await wrapper.find('#confirm-new-password').setValue(confirmPassword);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
   }
 
-  it('renders all four fields and submit button', () => {
+  it('renders three fields and submit button', () => {
     const wrapper = mountPage();
     expect(wrapper.find('#username').exists()).toBe(true);
-    expect(wrapper.find('#current-password').exists()).toBe(true);
+    expect(wrapper.find('#current-password').exists()).toBe(false);
     expect(wrapper.find('#new-password').exists()).toBe(true);
     expect(wrapper.find('#confirm-new-password').exists()).toBe(true);
     expect(wrapper.find('button[type="submit"]').exists()).toBe(true);
@@ -34,7 +33,6 @@ describe('ChangePasswordPage', () => {
 
   it.each([
     ['passwords do not match',      () => ({ confirmPassword: 'Different1x9' }),                      'Passwords do not match'],
-    ['new password equals current', () => ({ newPassword: ctx.pwd, confirmPassword: ctx.pwd }),        'New password must be different from current password'],
     ['new password is too short',   () => ({ newPassword: 'Short1', confirmPassword: 'Short1' }),      'Password must be at least 8 characters'],
     ['new password has no numbers', () => ({ newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' }), 'Password must contain letters and numbers'],
   ])('blocks submit when %s', async (_label, getInput, errorMsg) => {
@@ -49,7 +47,6 @@ describe('ChangePasswordPage', () => {
     await fillAndSubmit(wrapper);
     expect(authStore.changePassword).toHaveBeenCalledWith({
       username: 'testuser',
-      currentPassword: ctx.pwd,
       newPassword: newPwd,
     });
   });

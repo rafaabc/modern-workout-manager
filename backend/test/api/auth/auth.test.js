@@ -142,7 +142,6 @@ describe('Auth API', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: 'changeuser',
-          currentPassword: originalPassword,
           newPassword: newValidPassword,
         }),
       });
@@ -176,24 +175,9 @@ describe('Auth API', () => {
       const res = await fetch(`${baseUrl}/api/users/password`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword: newValidPassword, newPassword: anotherPassword }),
+        body: JSON.stringify({ newPassword: anotherPassword }),
       });
       assert.equal(res.status, 400);
-      const body = await res.json();
-      assert.ok(body.error);
-    });
-
-    it('should return 401 for wrong current password', async () => {
-      const res = await fetch(`${baseUrl}/api/users/password`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: 'changeuser',
-          currentPassword: randomPassword(),
-          newPassword: anotherPassword,
-        }),
-      });
-      assert.equal(res.status, 401);
       const body = await res.json();
       assert.ok(body.error);
     });
@@ -204,7 +188,6 @@ describe('Auth API', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: 'nobody',
-          currentPassword: randomPassword(),
           newPassword: anotherPassword,
         }),
       });
@@ -219,7 +202,6 @@ describe('Auth API', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: 'changeuser',
-          currentPassword: newValidPassword,
           newPassword: 'weak',
         }),
       });

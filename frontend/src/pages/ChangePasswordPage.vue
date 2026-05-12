@@ -19,7 +19,6 @@
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <FormField id="username" :label="t('fields.username')" v-model="username" required />
-        <FormField id="current-password" :label="t('fields.currentPassword')" type="password" v-model="currentPassword" required />
         <FormField id="new-password" :label="t('fields.newPassword')" type="password" v-model="newPassword" required />
         <FormField id="confirm-new-password" :label="t('fields.confirmNewPassword')" type="password" v-model="confirmNewPassword" required />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
@@ -55,7 +54,6 @@ import { useI18n } from '../composables/useI18n.js';
 import FormField from '../components/FormField.vue';
 
 const username = ref('');
-const currentPassword = ref('');
 const newPassword = ref('');
 const confirmNewPassword = ref('');
 const error = ref('');
@@ -83,10 +81,6 @@ function validate() {
     error.value = t('validation.passwordsDoNotMatch');
     return false;
   }
-  if (newPassword.value === currentPassword.value) {
-    error.value = t('validation.newPasswordSameAsCurrent');
-    return false;
-  }
   return true;
 }
 
@@ -100,7 +94,6 @@ async function handleSubmit() {
   try {
     await authStore.changePassword({
       username: username.value,
-      currentPassword: currentPassword.value,
       newPassword: newPassword.value,
     });
     successMessage.value = t('changePassword.successRedirect');

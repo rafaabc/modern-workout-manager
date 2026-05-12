@@ -28,8 +28,8 @@ export function createUserController(userService) {
 
     async changePassword(req, res) {
       try {
-        const { username, currentPassword, newPassword } = req.body;
-        await userService.changePassword({ username, currentPassword, newPassword });
+        const { username, newPassword } = req.body;
+        await userService.changePassword({ username, newPassword });
         return res.status(200).json({ message: 'Password updated successfully' });
       } catch (err) {
         const status = err.status || 500;
