@@ -1,16 +1,24 @@
 import mongoose from 'mongoose';
 
-export async function connectMongo(uri) {
-  await mongoose.connect(uri);
-  console.log('Connected to MongoDB');
+let connectPromise;
 
-  mongoose.connection.on('error', (err) => {
-    console.error('MongoDB connection error:', err);
-  });
+export function connectMongo(uri) {
+  if (!connectPromise) {
+    connectPromise = mongoose.connect(uri).then((conn) => {
+      console.log('Connected to MongoDB');
 
-  mongoose.connection.on('disconnected', () => {
-    console.warn('MongoDB disconnected');
-  });
+      conn.connection.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
+        connectPromise = null;
+      });
 
-  return mongoose.connection;
+      conn.connection.on('disconnected', () => {
+        console.warn('MongoDB disconnected');
+        connectPromise = null;
+      });
+
+      return conn.connection;
+    });
+  }
+  return connectPromise;
 }
