@@ -27,23 +27,13 @@ describe('Router navigation guards', () => {
     expect(router.currentRoute.value.path).toBe('/login');
   });
 
-  it('allows access to /login when not authenticated', async () => {
-    await router.push('/login');
-    expect(router.currentRoute.value.path).toBe('/login');
-  });
-
-  it('allows access to /register when not authenticated', async () => {
-    await router.push('/register');
-    expect(router.currentRoute.value.path).toBe('/register');
-  });
-
-  it('redirects to / when accessing public route while authenticated', async () => {
-    const authStore = useAuthStore();
-    authStore.token = 'valid-token';
-
-    await router.push('/login');
-    expect(router.currentRoute.value.path).toBe('/');
-  });
+  it.each(['/login', '/register', '/change-password'])(
+    'allows access to %s when not authenticated',
+    async (path) => {
+      await router.push(path);
+      expect(router.currentRoute.value.path).toBe(path);
+    },
+  );
 
   it('allows access to / when authenticated', async () => {
     const authStore = useAuthStore();
@@ -53,16 +43,14 @@ describe('Router navigation guards', () => {
     expect(router.currentRoute.value.path).toBe('/');
   });
 
-  it('allows access to /change-password when not authenticated', async () => {
-    await router.push('/change-password');
-    expect(router.currentRoute.value.path).toBe('/change-password');
-  });
+  it.each(['/login', '/change-password'])(
+    'redirects to / when accessing %s while authenticated',
+    async (path) => {
+      const authStore = useAuthStore();
+      authStore.token = 'valid-token';
 
-  it('redirects to / when accessing /change-password while authenticated', async () => {
-    const authStore = useAuthStore();
-    authStore.token = 'valid-token';
-
-    await router.push('/change-password');
-    expect(router.currentRoute.value.path).toBe('/');
-  });
+      await router.push(path);
+      expect(router.currentRoute.value.path).toBe('/');
+    },
+  );
 });

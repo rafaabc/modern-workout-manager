@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { flushPromises } from '@vue/test-utils';
 import ChangePasswordPage from '../../../src/pages/ChangePasswordPage.vue';
 import { useAuthStore } from '../../../src/stores/authStore.js';
@@ -6,15 +6,12 @@ import { testPassword } from '../../helpers/testCredentials.js';
 import { createPageSetup } from '../../helpers/createPageSetup.js';
 
 describe('ChangePasswordPage', () => {
-  const { ctx, setup, teardown, mountPage } = createPageSetup(ChangePasswordPage, '/change-password');
+  const { ctx, mountPage } = createPageSetup(ChangePasswordPage, '/change-password');
   let newPwd;
 
-  beforeEach(async () => {
-    await setup();
+  beforeEach(() => {
     newPwd = testPassword();
   });
-
-  afterEach(teardown);
 
   function mountWithSpy() {
     const wrapper = mountPage();

@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { mount } from '@vue/test-utils';
-import { vi } from 'vitest';
+import { vi, beforeEach, afterEach } from 'vitest';
 import { testPassword } from './testCredentials.js';
 
 export function createPageSetup(PageComponent, pagePath, extraRoutes = []) {
@@ -34,6 +34,9 @@ export function createPageSetup(PageComponent, pagePath, extraRoutes = []) {
   function mountPage() {
     return mount(PageComponent, { global: { plugins: [ctx.pinia, ctx.router] } });
   }
+
+  beforeEach(async () => { await setup(); });
+  afterEach(teardown);
 
   return { ctx, setup, teardown, mountPage };
 }

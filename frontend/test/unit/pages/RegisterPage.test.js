@@ -1,19 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { flushPromises } from '@vue/test-utils';
 import RegisterPage from '../../../src/pages/RegisterPage.vue';
 import { useAuthStore } from '../../../src/stores/authStore.js';
 import { createPageSetup } from '../../helpers/createPageSetup.js';
 
 describe('RegisterPage', () => {
-  const { ctx, setup, teardown, mountPage } = createPageSetup(RegisterPage, '/register', [
+  const { ctx, mountPage } = createPageSetup(RegisterPage, '/register', [
     { path: '/', component: { template: '<div>Dashboard</div>' } },
   ]);
-
-  beforeEach(async () => {
-    await setup();
-  });
-
-  afterEach(teardown);
 
   function mountWithSpy() {
     const wrapper = mountPage();
