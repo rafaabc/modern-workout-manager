@@ -81,5 +81,30 @@ export function createUserService(userRepository) {
       const token = jwt.sign({ userId: user.id, username: user.username }, secret);
       return { token };
     },
+
+    async changePassword({ username, currentPassword, newPassword }) {
+      const passwordValidation = validatePassword(newPassword);
+      if (!passwordValidation.valid) {
+        const error = new Error(passwordValidation.error);
+        error.status = 400;
+        throw error;
+      }
+
+      const user = await userRepository.findByUsername(username);
+      if (!user) {
+        const error = new Error('User not found');
+        error.status = 404;
+        throw error;
+      }
+
+      if (!verifyPassword(currentPassword, user.password)) {
+        const error = new Error('Invalid credentials');
+        error.status = 401;
+        throw error;
+      }
+
+      const hashedPassword = hashPassword(newPassword);
+      await userRepository.updatePassword(username, hashedPassword);
+    },
   };
 }
