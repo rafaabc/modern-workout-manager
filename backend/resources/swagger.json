@@ -120,7 +120,6 @@
       "patch": {
         "tags": ["Authentication"],
         "summary": "Change password",
-        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -597,8 +596,9 @@
       },
       "ChangePasswordRequest": {
         "type": "object",
-        "required": ["currentPassword", "newPassword"],
+        "required": ["username", "currentPassword", "newPassword"],
         "properties": {
+          "username": { "type": "string", "minLength": 3, "example": "john_doe" },
           "currentPassword": { "type": "string", "example": "OldPass123" },
           "newPassword": { "type": "string", "minLength": 8, "example": "NewPass456" }
         }
