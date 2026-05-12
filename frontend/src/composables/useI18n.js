@@ -22,10 +22,16 @@ const translations = {
     fields: {
       username: 'Username',
       secret: EN_PASS_LABEL,
+      currentPassword: 'Current password',
+      newPassword: 'New password',
+      confirmNewPassword: 'Confirm new password',
     },
     login: {
       registerSuccess: 'Registration completed successfully. You can now sign in.',
       noAccount: "Don't have an account?",
+      passwordChanged: 'Password changed successfully. You can now sign in.',
+      forgotPassword: 'Forgot your password?',
+      changeIt: 'Change it',
     },
     register: {
       title: 'Register',
@@ -40,6 +46,14 @@ const translations = {
       usernameMin: 'Username must be at least 3 characters',
       secretMin: `${EN_PASS_LABEL} must be at least 8 characters`,
       secretLettersNumbers: `${EN_PASS_LABEL} must contain letters and numbers`,
+      passwordsDoNotMatch: 'Passwords do not match',
+    },
+    changePassword: {
+      title: 'Change Password',
+      submit: 'Change password',
+      changingPassword: 'Changing password...',
+      successRedirect: 'Password changed. Redirecting to login...',
+      backToLogin: 'Back to login',
     },
     metrics: {
       title: 'Workout Metrics',
@@ -77,10 +91,16 @@ const translations = {
     fields: {
       username: 'Usuário',
       secret: PT_PASS_LABEL,
+      currentPassword: 'Senha atual',
+      newPassword: 'Nova senha',
+      confirmNewPassword: 'Confirmar nova senha',
     },
     login: {
       registerSuccess: 'Cadastro realizado com sucesso. Você já pode entrar.',
       noAccount: 'Não tem uma conta?',
+      passwordChanged: 'Senha alterada com sucesso. Você já pode entrar.',
+      forgotPassword: 'Esqueceu sua senha?',
+      changeIt: 'Altere aqui',
     },
     register: {
       title: 'Cadastrar',
@@ -95,6 +115,14 @@ const translations = {
       usernameMin: 'Usuário deve ter pelo menos 3 caracteres',
       secretMin: `${PT_PASS_LABEL} deve ter pelo menos 8 caracteres`,
       secretLettersNumbers: `${PT_PASS_LABEL} deve conter letras e números`,
+      passwordsDoNotMatch: 'As senhas não coincidem',
+    },
+    changePassword: {
+      title: 'Alterar Senha',
+      submit: 'Alterar senha',
+      changingPassword: 'Alterando senha...',
+      successRedirect: 'Senha alterada. Redirecionando...',
+      backToLogin: 'Voltar para o login',
     },
     metrics: {
       title: 'Métricas de treino',
@@ -121,6 +149,7 @@ const translations = {
 
 const localizedErrorMessages = {
   'pt-BR': {
+    'User not found': 'Usuário não encontrado',
     'Invalid credentials': 'Credenciais inválidas',
     'Login failed': 'Falha ao efetuar login',
     'Registration failed': 'Falha no cadastro',
