@@ -9,8 +9,13 @@ import '../../src/database/models/Goal.js';
 let mongod;
 
 export async function startTestDatabase() {
+  delete process.env.MONGODB_URI;
   mongod = await MongoMemoryServer.create();
-  await mongoose.connect(mongod.getUri());
+  const uri = mongod.getUri();
+  if (!/^mongodb:\/\/127\.0\.0\.1:/.test(uri)) {
+    throw new Error(`Refusing to connect tests to non-in-memory Mongo: ${uri}`);
+  }
+  await mongoose.connect(uri);
 }
 
 export async function clearCollections() {

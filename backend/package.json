@@ -11,7 +11,8 @@
     "test:unit:coverage": "c8 --reporter=text --reporter=html node --test test/unit/**/*.test.js",
     "test:integration": "node --test test/integration/**/*.test.js",
     "test:integration:coverage": "c8 --reporter=text --reporter=html node --test test/integration/**/*.test.js",
-    "test:api": "node --test test/api/**/*.test.js"
+    "test:api": "node --test test/api/**/*.test.js",
+    "db:wipe-e2e": "node --env-file=../.env scripts/wipeE2eData.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

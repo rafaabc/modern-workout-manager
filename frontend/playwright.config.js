@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e/tests',
+  globalSetup: './e2e/global-setup.js',
   // Sequential execution prevents SQLite write contention across parallel test workers
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
