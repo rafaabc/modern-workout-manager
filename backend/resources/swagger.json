@@ -137,7 +137,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
+                  "$ref": "#/components/schemas/LogoutResponse"
                 }
               }
             }
@@ -597,13 +597,7 @@
         "required": ["currentPassword", "newPassword"],
         "properties": {
           "currentPassword": { "type": "string", "example": "OldPass123" },
-          "newPassword": { "type": "string", "example": "NewPass456" }
-        }
-      },
-      "MessageResponse": {
-        "type": "object",
-        "properties": {
-          "message": { "type": "string", "example": "Password updated successfully" }
+          "newPassword": { "type": "string", "minLength": 8, "example": "NewPass456" }
         }
       }
     }
