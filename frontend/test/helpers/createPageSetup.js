@@ -15,7 +15,7 @@ export function createPageSetup(PageComponent, pagePath, extraRoutes = []) {
       history: createMemoryHistory(),
       routes: [
         { path: pagePath, component: PageComponent },
-        { path: '/login', component: { template: '<div>Login</div>' } },
+        ...(pagePath !== '/login' ? [{ path: '/login', component: { template: '<div>Login</div>' } }] : []),
         ...extraRoutes,
       ],
     });
