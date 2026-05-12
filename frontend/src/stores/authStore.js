@@ -62,8 +62,14 @@ async function doLogin(token, user, { username, password }) {
   });
 
   if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || 'Login failed');
+    let message = 'Login failed';
+    try {
+      const data = await response.json();
+      message = data.error || message;
+    } catch {
+      // empty or non-JSON proxy error
+    }
+    throw new Error(message);
   }
 
   const data = await response.json();
@@ -82,8 +88,14 @@ async function doRegister({ username, password }) {
   });
 
   if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || 'Registration failed');
+    let message = 'Registration failed';
+    try {
+      const data = await response.json();
+      message = data.error || message;
+    } catch {
+      // empty or non-JSON proxy error
+    }
+    throw new Error(message);
   }
 
   return response.json();
@@ -96,16 +108,22 @@ async function doLogout(token, user) {
   clearStoredSession();
 }
 
-async function doChangePassword({ username, currentPassword, newPassword }) {
+async function doChangePassword({ username, newPassword }) {
   const response = await fetch('/api/users/password', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, currentPassword, newPassword }),
+    body: JSON.stringify({ username, newPassword }),
   });
 
   if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || 'Request failed');
+    let message = 'Request failed';
+    try {
+      const data = await response.json();
+      message = data.error || message;
+    } catch {
+      // empty or non-JSON proxy error
+    }
+    throw new Error(message);
   }
 
   return response.json();

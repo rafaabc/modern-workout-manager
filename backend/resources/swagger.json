@@ -596,10 +596,9 @@
       },
       "ChangePasswordRequest": {
         "type": "object",
-        "required": ["username", "currentPassword", "newPassword"],
+        "required": ["username", "newPassword"],
         "properties": {
           "username": { "type": "string", "minLength": 3, "example": "john_doe" },
-          "currentPassword": { "type": "string", "example": "OldPass123" },
           "newPassword": { "type": "string", "minLength": 8, "example": "NewPass456" }
         }
       }

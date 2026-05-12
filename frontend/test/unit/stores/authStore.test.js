@@ -166,7 +166,6 @@ describe('authStore', () => {
       const store = useAuthStore();
       await store.changePassword({
         username: 'testuser',
-        currentPassword: pwd,
         newPassword: 'Newpass1x9',
       });
 
@@ -175,7 +174,6 @@ describe('authStore', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: 'testuser',
-          currentPassword: pwd,
           newPassword: 'Newpass1x9',
         }),
       });
@@ -191,7 +189,6 @@ describe('authStore', () => {
       await expect(
         store.changePassword({
           username: 'nobody',
-          currentPassword: pwd,
           newPassword: 'Newpass1x9',
         }),
       ).rejects.toThrow('User not found');
