@@ -18,54 +18,10 @@
         </div>
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.username')
-          }}</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
-        <div>
-          <label for="current-password" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.currentPassword')
-          }}</label>
-          <input
-            id="current-password"
-            v-model="currentPassword"
-            type="password"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
-        <div>
-          <label for="new-password" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.newPassword')
-          }}</label>
-          <input
-            id="new-password"
-            v-model="newPassword"
-            type="password"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
-        <div>
-          <label for="confirm-new-password" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.confirmNewPassword')
-          }}</label>
-          <input
-            id="confirm-new-password"
-            v-model="confirmNewPassword"
-            type="password"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
+        <FormField id="username" :label="t('fields.username')" v-model="username" required />
+        <FormField id="current-password" :label="t('fields.currentPassword')" type="password" v-model="currentPassword" required />
+        <FormField id="new-password" :label="t('fields.newPassword')" type="password" v-model="newPassword" required />
+        <FormField id="confirm-new-password" :label="t('fields.confirmNewPassword')" type="password" v-model="confirmNewPassword" required />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
         <button
           type="submit"
@@ -96,6 +52,7 @@ import { ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
 import { useI18n } from '../composables/useI18n.js';
+import FormField from '../components/FormField.vue';
 
 const username = ref('');
 const currentPassword = ref('');

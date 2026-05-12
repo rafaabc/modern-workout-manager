@@ -19,30 +19,8 @@
         </div>
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.username')
-          }}</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.secret')
-          }}</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
+        <FormField id="username" :label="t('fields.username')" v-model="username" required />
+        <FormField id="password" :label="t('fields.secret')" type="password" v-model="password" required />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
         <button
           type="submit"
@@ -74,6 +52,7 @@ import { ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
 import { useI18n } from '../composables/useI18n.js';
+import FormField from '../components/FormField.vue';
 
 const username = ref('');
 const password = ref('');
