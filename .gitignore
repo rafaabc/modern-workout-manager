@@ -9,3 +9,6 @@ coverage/
 # Playwright
 playwright-report/
 test-results/
+
+# Superpowers plan/spec docs (transient, not for version control)
+docs/superpowers/
