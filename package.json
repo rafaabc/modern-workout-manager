@@ -15,7 +15,7 @@
     "test:backend": "npm --workspace=backend run test:unit && npm --workspace=backend run test:integration && npm --workspace=backend run test:api",
     "test:frontend": "npm --workspace=frontend run test:unit",
     "test": "npm run test:backend && npm run test:frontend",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "start:backend": "npm --workspace=backend run start",
     "start:frontend": "npm --workspace=frontend run dev",
     "test:e2e": "npm --workspace=frontend run test:e2e",
