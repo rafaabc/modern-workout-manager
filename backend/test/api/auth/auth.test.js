@@ -122,4 +122,113 @@ describe('Auth API', () => {
       assert.ok(body.message);
     });
   });
+
+  describe('PATCH /api/users/password', () => {
+    let token;
+    const originalPassword = randomPassword();
+    const newValidPassword = randomPassword();
+    const anotherPassword = randomPassword();
+
+    before(async () => {
+      await fetch(`${baseUrl}/api/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: originalPassword }),
+      });
+      const loginRes = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: originalPassword }),
+      });
+      const loginBody = await loginRes.json();
+      token = loginBody.token;
+    });
+
+    it('should return 200 and update the password', async () => {
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword: originalPassword, newPassword: newValidPassword }),
+      });
+
+      assert.equal(res.status, 200);
+      const body = await res.json();
+      assert.equal(body.message, 'Password updated successfully');
+    });
+
+    it('should reject login with old password after change', async () => {
+      const res = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: originalPassword }),
+      });
+      assert.equal(res.status, 401);
+    });
+
+    it('should allow login with new password after change', async () => {
+      const res = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: newValidPassword }),
+      });
+      assert.equal(res.status, 200);
+      const body = await res.json();
+      assert.ok(body.token);
+    });
+
+    // Tests 4-6 run after test 1 has changed the password to newValidPassword
+    it('should return 401 when no token is provided', async () => {
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: newValidPassword, newPassword: anotherPassword }),
+      });
+      assert.equal(res.status, 401);
+    });
+
+    it('should return 401 for wrong current password', async () => {
+      const loginRes = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: newValidPassword }),
+      });
+      const { token: freshToken } = await loginRes.json();
+
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${freshToken}`,
+        },
+        body: JSON.stringify({ currentPassword: randomPassword(), newPassword: anotherPassword }),
+      });
+      assert.equal(res.status, 401);
+      const body = await res.json();
+      assert.ok(body.error);
+    });
+
+    it('should return 400 for invalid new password', async () => {
+      const loginRes = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: newValidPassword }),
+      });
+      const { token: freshToken } = await loginRes.json();
+
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${freshToken}`,
+        },
+        body: JSON.stringify({ currentPassword: newValidPassword, newPassword: 'weak' }),
+      });
+      assert.equal(res.status, 400);
+      const body = await res.json();
+      assert.ok(body.error);
+    });
+  });
 });

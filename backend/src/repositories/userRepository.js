@@ -12,5 +12,9 @@ export function createUserRepository() {
       const doc = await User.create({ username, password });
       return { id: doc._id.toString(), username: doc.username };
     },
+
+    async updatePassword(username, hashedPassword) {
+      await User.updateOne({ username: String(username) }, { password: hashedPassword });
+    },
   };
 }

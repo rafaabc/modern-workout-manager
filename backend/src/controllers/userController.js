@@ -25,5 +25,17 @@ export function createUserController(userService) {
     logout(_req, res) {
       return res.status(200).json({ message: 'Logged out successfully' });
     },
+
+    async changePassword(req, res) {
+      try {
+        const { currentPassword, newPassword } = req.body;
+        const { username } = req.user;
+        await userService.changePassword({ username, currentPassword, newPassword });
+        return res.status(200).json({ message: 'Password updated successfully' });
+      } catch (err) {
+        const status = err.status || 500;
+        return res.status(status).json({ error: err.message });
+      }
+    },
   };
 }

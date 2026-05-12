@@ -170,6 +170,7 @@ npx --prefix frontend playwright install
 | POST | `/api/users/register` | No | Register user |
 | POST | `/api/users/login` | No | Login (returns JWT) |
 | POST | `/api/users/logout` | No | Logout |
+| PATCH | `/api/users/password` | JWT | Change password |
 | GET | `/api/workouts/calendar` | JWT | Get monthly calendar (`?month=&year=`) |
 | POST | `/api/workouts/calendar` | JWT | Schedule a workout |
 | DELETE | `/api/workouts/calendar` | JWT | Remove a workout |

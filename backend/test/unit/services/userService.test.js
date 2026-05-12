@@ -14,6 +14,10 @@ function createMockRepository() {
       users.push(user);
       return { id: user.id, username: user.username };
     },
+    async updatePassword(username, hashedPassword) {
+      const user = users.find((u) => u.username === username);
+      if (user) user.password = hashedPassword;
+    },
     _users: users,
   };
 }
@@ -130,6 +134,128 @@ describe('userService', () => {
         (err) => {
           assert.equal(err.status, 401);
           assert.equal(err.message, 'Invalid credentials');
+          return true;
+        },
+      );
+    });
+  });
+
+  describe('changePassword', () => {
+    beforeEach(async () => {
+      await userService.register({ username: 'john', password: validPassword });
+    });
+
+    it('should change the password successfully', async () => {
+      await assert.doesNotReject(() =>
+        userService.changePassword({
+          username: 'john',
+          currentPassword: validPassword,
+          newPassword: anotherPassword,
+        }),
+      );
+    });
+
+    it('should allow login with new password after change', async () => {
+      await userService.changePassword({
+        username: 'john',
+        currentPassword: validPassword,
+        newPassword: anotherPassword,
+      });
+
+      const result = await userService.login({ username: 'john', password: anotherPassword });
+      assert.ok(result.token);
+    });
+
+    it('should reject login with old password after change', async () => {
+      await userService.changePassword({
+        username: 'john',
+        currentPassword: validPassword,
+        newPassword: anotherPassword,
+      });
+
+      await assert.rejects(
+        () => userService.login({ username: 'john', password: validPassword }),
+        (err) => {
+          assert.equal(err.status, 401);
+          return true;
+        },
+      );
+    });
+
+    it('should throw 401 for wrong current password', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'john',
+            currentPassword: wrongPassword,
+            newPassword: anotherPassword,
+          }),
+        (err) => {
+          assert.equal(err.status, 401);
+          assert.equal(err.message, 'Invalid credentials');
+          return true;
+        },
+      );
+    });
+
+    it('should throw 400 for new password shorter than 8 characters', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'john',
+            currentPassword: validPassword,
+            newPassword: 'Short1',
+          }),
+        (err) => {
+          assert.equal(err.status, 400);
+          assert.match(err.message, /at least 8 characters/);
+          return true;
+        },
+      );
+    });
+
+    it('should throw 400 for new password without numbers', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'john',
+            currentPassword: validPassword,
+            newPassword: 'NoNumbers',
+          }),
+        (err) => {
+          assert.equal(err.status, 400);
+          assert.match(err.message, /at least one number/);
+          return true;
+        },
+      );
+    });
+
+    it('should throw 400 when newPassword is missing', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'john',
+            currentPassword: validPassword,
+            newPassword: undefined,
+          }),
+        (err) => {
+          assert.equal(err.status, 400);
+          return true;
+        },
+      );
+    });
+
+    it('should throw 404 when user does not exist', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'nonexistent',
+            currentPassword: validPassword,
+            newPassword: anotherPassword,
+          }),
+        (err) => {
+          assert.equal(err.status, 404);
+          assert.equal(err.message, 'User not found');
           return true;
         },
       );

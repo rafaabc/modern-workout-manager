@@ -116,6 +116,58 @@
         }
       }
     },
+    "/api/users/password": {
+      "patch": {
+        "tags": ["Authentication"],
+        "summary": "Change password",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                },
+                "example": {
+                  "message": "Password updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (new password does not meet requirements)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated or wrong current password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/workouts/calendar": {
       "get": {
         "tags": ["Workouts"],
@@ -541,6 +593,14 @@
             "type": "integer",
             "example": 5
           }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": ["currentPassword", "newPassword"],
+        "properties": {
+          "currentPassword": { "type": "string", "example": "OldPass123" },
+          "newPassword": { "type": "string", "minLength": 8, "example": "NewPass456" }
         }
       }
     }
