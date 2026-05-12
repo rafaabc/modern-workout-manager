@@ -4,6 +4,7 @@ import ChangePasswordPage from '../../../src/pages/ChangePasswordPage.vue';
 import { useAuthStore } from '../../../src/stores/authStore.js';
 import { testPassword } from '../../helpers/testCredentials.js';
 import { createPageSetup } from '../../helpers/createPageSetup.js';
+import { mountWithAuthSpy } from '../../helpers/mountWithAuthSpy.js';
 
 describe('ChangePasswordPage', () => {
   const { ctx, mountPage } = createPageSetup(ChangePasswordPage, '/change-password');
@@ -12,13 +13,6 @@ describe('ChangePasswordPage', () => {
   beforeEach(() => {
     newPwd = testPassword();
   });
-
-  function mountWithSpy() {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'changePassword').mockResolvedValue();
-    return { wrapper, authStore };
-  }
 
   async function fillAndSubmit(wrapper, { currentPwd = ctx.pwd, newPassword = newPwd, confirmPassword = newPwd } = {}) {
     await wrapper.find('#username').setValue('testuser');
@@ -38,36 +32,20 @@ describe('ChangePasswordPage', () => {
     expect(wrapper.find('button[type="submit"]').exists()).toBe(true);
   });
 
-  it('blocks submit when passwords do not match', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { confirmPassword: 'Different1x9' });
+  it.each([
+    ['passwords do not match',      () => ({ confirmPassword: 'Different1x9' }),                      'Passwords do not match'],
+    ['new password equals current', () => ({ newPassword: ctx.pwd, confirmPassword: ctx.pwd }),        'New password must be different from current password'],
+    ['new password is too short',   () => ({ newPassword: 'Short1', confirmPassword: 'Short1' }),      'Password must be at least 8 characters'],
+    ['new password has no numbers', () => ({ newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' }), 'Password must contain letters and numbers'],
+  ])('blocks submit when %s', async (_label, getInput, errorMsg) => {
+    const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'changePassword');
+    await fillAndSubmit(wrapper, getInput());
     expect(authStore.changePassword).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('Passwords do not match');
-  });
-
-  it('blocks submit when new password equals current password', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { newPassword: ctx.pwd, confirmPassword: ctx.pwd });
-    expect(authStore.changePassword).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('New password must be different from current password');
-  });
-
-  it('blocks submit when new password is too short', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { newPassword: 'Short1', confirmPassword: 'Short1' });
-    expect(authStore.changePassword).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('Password must be at least 8 characters');
-  });
-
-  it('blocks submit when new password has no numbers', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' });
-    expect(authStore.changePassword).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('Password must contain letters and numbers');
+    expect(wrapper.find('.error').text()).toBe(errorMsg);
   });
 
   it('calls authStore.changePassword with correct values on valid submit', async () => {
-    const { wrapper, authStore } = mountWithSpy();
+    const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'changePassword');
     await fillAndSubmit(wrapper);
     expect(authStore.changePassword).toHaveBeenCalledWith({
       username: 'testuser',
@@ -77,7 +55,7 @@ describe('ChangePasswordPage', () => {
   });
 
   it('shows success feedback then redirects to /login?passwordChanged=1', async () => {
-    const { wrapper } = mountWithSpy();
+    const { wrapper } = mountWithAuthSpy(mountPage, 'changePassword');
     await fillAndSubmit(wrapper);
     expect(wrapper.find('.success').exists()).toBe(true);
     expect(ctx.router.currentRoute.value.path).toBe('/change-password');

@@ -76,44 +76,30 @@ describe('LoginPage', () => {
   });
 
   it.each([
-    ['registered', 'Registration completed successfully. You can now sign in.'],
-    ['loggedOut', 'Logged out successfully'],
+    ['registered',      'Registration completed successfully. You can now sign in.'],
+    ['loggedOut',       'Logged out successfully'],
     ['passwordChanged', 'Password changed successfully. You can now sign in.'],
   ])('shows %s message on arrival', async (queryKey, message) => {
     const wrapper = await mountWithQuery(queryKey);
     expect(wrapper.text()).toContain(message);
   });
 
-  it('registration message can be dismissed with close button', async () => {
-    const wrapper = await mountWithQuery('registered');
-    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de registro"]');
+  it.each([
+    ['registered',      'Registration completed successfully. You can now sign in.', 'Fechar mensagem de registro'],
+    ['loggedOut',       'Logged out successfully',                                    'Fechar mensagem de logout'],
+    ['passwordChanged', 'Password changed successfully. You can now sign in.',        'Fechar mensagem de senha alterada'],
+  ])('%s message can be dismissed with close button', async (queryKey, message, ariaLabel) => {
+    const wrapper = await mountWithQuery(queryKey);
+    const closeBtn = wrapper.find(`button[aria-label="${ariaLabel}"]`);
     expect(closeBtn.exists()).toBe(true);
     await closeBtn.trigger('click');
     await flushPromises();
-    expect(wrapper.text()).not.toContain('Registration completed successfully. You can now sign in.');
-  });
-
-  it('logout message can be dismissed with close button', async () => {
-    const wrapper = await mountWithQuery('loggedOut');
-    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de logout"]');
-    expect(closeBtn.exists()).toBe(true);
-    await closeBtn.trigger('click');
-    await flushPromises();
-    expect(wrapper.text()).not.toContain('Logged out successfully');
-  });
-
-  it('password changed message can be dismissed with close button', async () => {
-    const wrapper = await mountWithQuery('passwordChanged');
-    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de senha alterada"]');
-    expect(closeBtn.exists()).toBe(true);
-    await closeBtn.trigger('click');
-    await flushPromises();
-    expect(wrapper.text()).not.toContain('Password changed successfully. You can now sign in.');
+    expect(wrapper.text()).not.toContain(message);
   });
 
   it.each([
-    ['registered', 'Registration completed successfully. You can now sign in.'],
-    ['loggedOut', 'Logged out successfully'],
+    ['registered',      'Registration completed successfully. You can now sign in.'],
+    ['loggedOut',       'Logged out successfully'],
     ['passwordChanged', 'Password changed successfully. You can now sign in.'],
   ])('%s message is removed after timeout and query param cleared', async (queryKey, message) => {
     const wrapper = await mountWithQuery(queryKey);

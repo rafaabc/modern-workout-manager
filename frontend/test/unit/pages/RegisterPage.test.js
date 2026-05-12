@@ -3,18 +3,12 @@ import { flushPromises } from '@vue/test-utils';
 import RegisterPage from '../../../src/pages/RegisterPage.vue';
 import { useAuthStore } from '../../../src/stores/authStore.js';
 import { createPageSetup } from '../../helpers/createPageSetup.js';
+import { mountWithAuthSpy } from '../../helpers/mountWithAuthSpy.js';
 
 describe('RegisterPage', () => {
   const { ctx, mountPage } = createPageSetup(RegisterPage, '/register', [
     { path: '/', component: { template: '<div>Dashboard</div>' } },
   ]);
-
-  function mountWithSpy() {
-    const wrapper = mountPage();
-    const authStore = useAuthStore();
-    vi.spyOn(authStore, 'register').mockResolvedValue();
-    return { wrapper, authStore };
-  }
 
   async function fillAndSubmit(wrapper, { username = 'testuser', password = ctx.pwd } = {}) {
     await wrapper.find('#username').setValue(username);
@@ -23,29 +17,19 @@ describe('RegisterPage', () => {
     await flushPromises();
   }
 
-  it('blocks submit when username is too short', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { username: 'ab' });
+  it.each([
+    ['username is too short',   { username: 'ab' },        'Username must be at least 3 characters'],
+    ['password is too short',   { password: 'pass1' },     'Password must be at least 8 characters'],
+    ['password has no numbers', { password: 'abcdefgh' },  'Password must contain letters and numbers'],
+  ])('blocks submit when %s', async (_label, input, errorMsg) => {
+    const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'register');
+    await fillAndSubmit(wrapper, input);
     expect(authStore.register).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('Username must be at least 3 characters');
-  });
-
-  it('blocks submit when password is too short', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { password: 'pass1' });
-    expect(authStore.register).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('Password must be at least 8 characters');
-  });
-
-  it('blocks submit when password has no numbers', async () => {
-    const { wrapper, authStore } = mountWithSpy();
-    await fillAndSubmit(wrapper, { password: 'abcdefgh' });
-    expect(authStore.register).not.toHaveBeenCalled();
-    expect(wrapper.find('.error').text()).toBe('Password must contain letters and numbers');
+    expect(wrapper.find('.error').text()).toBe(errorMsg);
   });
 
   it('calls authStore.register() with correct values on valid submit', async () => {
-    const { wrapper, authStore } = mountWithSpy();
+    const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'register');
     await fillAndSubmit(wrapper, { username: 'newuser' });
     expect(authStore.register).toHaveBeenCalledWith({
       username: 'newuser',
@@ -62,7 +46,7 @@ describe('RegisterPage', () => {
   });
 
   it('shows success feedback before redirecting to /login after successful registration', async () => {
-    const { wrapper } = mountWithSpy();
+    const { wrapper } = mountWithAuthSpy(mountPage, 'register');
     await fillAndSubmit(wrapper, { username: 'newuser' });
 
     expect(wrapper.find('.success').text()).toContain('Registration successful.');
@@ -78,7 +62,7 @@ describe('RegisterPage', () => {
   });
 
   it('clears the pending redirect timer when the page is unmounted', async () => {
-    const { wrapper } = mountWithSpy();
+    const { wrapper } = mountWithAuthSpy(mountPage, 'register');
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
     await fillAndSubmit(wrapper, { username: 'newuser' });
     wrapper.unmount();
