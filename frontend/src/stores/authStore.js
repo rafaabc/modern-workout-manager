@@ -96,6 +96,21 @@ async function doLogout(token, user) {
   clearStoredSession();
 }
 
+async function doChangePassword({ username, currentPassword, newPassword }) {
+  const response = await fetch('/api/users/password', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, currentPassword, newPassword }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Request failed');
+  }
+
+  return response.json();
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const storedToken = localStorage.getItem(TOKEN_KEY);
   const lastActivityAt = readLastActivity();
@@ -139,6 +154,7 @@ export const useAuthStore = defineStore('auth', () => {
   const login = (credentials) => doLogin(token, user, credentials);
   const register = (credentials) => doRegister(credentials);
   const logout = () => doLogout(token, user);
+  const changePassword = (credentials) => doChangePassword(credentials);
 
   return {
     token,
@@ -147,6 +163,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    changePassword,
     touchActivity,
     getIdleMs,
     isInactiveSessionExpired,

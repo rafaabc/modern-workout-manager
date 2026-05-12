@@ -7,120 +7,110 @@ const EN_PASS_LABEL = `Pass${'word'}`;
 const PT_PASS_LABEL = 'Senha';
 
 const translations = {
-  'en-GB': {
-    appName: 'Workout Manager',
-    userFallback: 'User',
-    auth: {
-      login: 'Login',
-      register: 'Register',
-      logout: 'Logout',
-      loggedOut: 'Logged out successfully',
+  appName: { 'en-GB': 'Workout Manager', 'pt-BR': 'Workout Manager' },
+  userFallback: { 'en-GB': 'User', 'pt-BR': 'Usuário' },
+  auth: {
+    login: { 'en-GB': 'Login', 'pt-BR': 'Entrar' },
+    register: { 'en-GB': 'Register', 'pt-BR': 'Cadastrar' },
+    logout: { 'en-GB': 'Logout', 'pt-BR': 'Sair' },
+    loggedOut: { 'en-GB': 'Logged out successfully', 'pt-BR': 'Desconectado com sucesso' },
+  },
+  dashboard: {
+    title: { 'en-GB': 'Dashboard', 'pt-BR': 'Painel' },
+  },
+  fields: {
+    username: { 'en-GB': 'Username', 'pt-BR': 'Usuário' },
+    secret: { 'en-GB': EN_PASS_LABEL, 'pt-BR': PT_PASS_LABEL },
+    currentPassword: { 'en-GB': 'Current password', 'pt-BR': 'Senha atual' },
+    newPassword: { 'en-GB': 'New password', 'pt-BR': 'Nova senha' },
+    confirmNewPassword: { 'en-GB': 'Confirm new password', 'pt-BR': 'Confirmar nova senha' },
+  },
+  login: {
+    registerSuccess: {
+      'en-GB': 'Registration completed successfully. You can now sign in.',
+      'pt-BR': 'Cadastro realizado com sucesso. Você já pode entrar.',
     },
-    dashboard: {
-      title: 'Dashboard',
+    noAccount: { 'en-GB': "Don't have an account?", 'pt-BR': 'Não tem uma conta?' },
+    passwordChanged: {
+      'en-GB': 'Password changed successfully. You can now sign in.',
+      'pt-BR': 'Senha alterada com sucesso. Você já pode entrar.',
     },
-    fields: {
-      username: 'Username',
-      secret: EN_PASS_LABEL,
+    forgotPassword: { 'en-GB': 'Forgot your password?', 'pt-BR': 'Esqueceu sua senha?' },
+    changeIt: { 'en-GB': 'Change it', 'pt-BR': 'Altere aqui' },
+  },
+  register: {
+    title: { 'en-GB': 'Register', 'pt-BR': 'Cadastrar' },
+    haveAccount: { 'en-GB': 'Already have an account?', 'pt-BR': 'Já tem uma conta?' },
+    redirecting: { 'en-GB': 'Redirecting...', 'pt-BR': 'Redirecionando...' },
+    creatingAccount: { 'en-GB': 'Creating account...', 'pt-BR': 'Criando conta...' },
+    submit: { 'en-GB': 'Register', 'pt-BR': 'Cadastrar' },
+    successTitle: {
+      'en-GB': 'Registration successful.',
+      'pt-BR': 'Cadastro realizado com sucesso.',
     },
-    login: {
-      registerSuccess: 'Registration completed successfully. You can now sign in.',
-      noAccount: "Don't have an account?",
-    },
-    register: {
-      title: 'Register',
-      haveAccount: 'Already have an account?',
-      redirecting: 'Redirecting...',
-      creatingAccount: 'Creating account...',
-      submit: 'Register',
-      successTitle: 'Registration successful.',
-      successRedirect: 'Your account is ready. Redirecting to login...',
-    },
-    validation: {
-      usernameMin: 'Username must be at least 3 characters',
-      secretMin: `${EN_PASS_LABEL} must be at least 8 characters`,
-      secretLettersNumbers: `${EN_PASS_LABEL} must contain letters and numbers`,
-    },
-    metrics: {
-      title: 'Workout Metrics',
-      setAnnualGoal: 'Set annual goal',
-      annualGoalPlaceholder: 'Annual goal',
-      saveGoal: 'Save goal',
-      goalSaved: 'Goal saved successfully',
-      goalSaveFailed: 'Failed to save goal',
-      totalThisYear: 'Total this year',
-      annualGoal: 'Annual goal: {goal}',
-      noGoalSet: 'No goal set',
-    },
-    language: {
-      selectorLabel: 'Language selector',
-      englishUk: 'British English',
-      portugueseBr: 'Portuguese (Brazil)',
-    },
-    aria: {
-      userMenu: 'User menu',
-      authentication: 'Authentication',
+    successRedirect: {
+      'en-GB': 'Your account is ready. Redirecting to login...',
+      'pt-BR': 'Sua conta está pronta. Redirecionando para o login...',
     },
   },
-  'pt-BR': {
-    appName: 'Workout Manager',
-    userFallback: 'Usuário',
-    auth: {
-      login: 'Entrar',
-      register: 'Cadastrar',
-      logout: 'Sair',
-      loggedOut: 'Desconectado com sucesso',
+  validation: {
+    usernameMin: {
+      'en-GB': 'Username must be at least 3 characters',
+      'pt-BR': 'Usuário deve ter pelo menos 3 caracteres',
     },
-    dashboard: {
-      title: 'Painel',
+    secretMin: {
+      'en-GB': `${EN_PASS_LABEL} must be at least 8 characters`,
+      'pt-BR': `${PT_PASS_LABEL} deve ter pelo menos 8 caracteres`,
     },
-    fields: {
-      username: 'Usuário',
-      secret: PT_PASS_LABEL,
+    secretLettersNumbers: {
+      'en-GB': `${EN_PASS_LABEL} must contain letters and numbers`,
+      'pt-BR': `${PT_PASS_LABEL} deve conter letras e números`,
     },
-    login: {
-      registerSuccess: 'Cadastro realizado com sucesso. Você já pode entrar.',
-      noAccount: 'Não tem uma conta?',
+    passwordsDoNotMatch: {
+      'en-GB': 'Passwords do not match',
+      'pt-BR': 'As senhas não coincidem',
     },
-    register: {
-      title: 'Cadastrar',
-      haveAccount: 'Já tem uma conta?',
-      redirecting: 'Redirecionando...',
-      creatingAccount: 'Criando conta...',
-      submit: 'Cadastrar',
-      successTitle: 'Cadastro realizado com sucesso.',
-      successRedirect: 'Sua conta está pronta. Redirecionando para o login...',
+    newPasswordSameAsCurrent: {
+      'en-GB': 'New password must be different from current password',
+      'pt-BR': 'A nova senha deve ser diferente da senha atual',
     },
-    validation: {
-      usernameMin: 'Usuário deve ter pelo menos 3 caracteres',
-      secretMin: `${PT_PASS_LABEL} deve ter pelo menos 8 caracteres`,
-      secretLettersNumbers: `${PT_PASS_LABEL} deve conter letras e números`,
+  },
+  changePassword: {
+    title: { 'en-GB': 'Change Password', 'pt-BR': 'Alterar Senha' },
+    submit: { 'en-GB': 'Change password', 'pt-BR': 'Alterar senha' },
+    changingPassword: { 'en-GB': 'Changing password...', 'pt-BR': 'Alterando senha...' },
+    redirecting: { 'en-GB': 'Redirecting...', 'pt-BR': 'Redirecionando...' },
+    successRedirect: {
+      'en-GB': 'Password changed. Redirecting to login...',
+      'pt-BR': 'Senha alterada. Redirecionando...',
     },
-    metrics: {
-      title: 'Métricas de treino',
-      setAnnualGoal: 'Definir meta anual',
-      annualGoalPlaceholder: 'Meta anual',
-      saveGoal: 'Salvar meta',
-      goalSaved: 'Meta salva com sucesso',
-      goalSaveFailed: 'Falha ao salvar meta',
-      totalThisYear: 'Total este ano',
-      annualGoal: 'Meta anual: {goal}',
-      noGoalSet: 'Nenhuma meta definida',
-    },
-    language: {
-      selectorLabel: 'Seletor de idioma',
-      englishUk: 'Inglês (Reino Unido)',
-      portugueseBr: 'Português (Brasil)',
-    },
-    aria: {
-      userMenu: 'Menu do usuário',
-      authentication: 'Autenticação',
-    },
+    backToLogin: { 'en-GB': 'Back to login', 'pt-BR': 'Voltar para o login' },
+  },
+  metrics: {
+    title: { 'en-GB': 'Workout Metrics', 'pt-BR': 'Métricas de treino' },
+    setAnnualGoal: { 'en-GB': 'Set annual goal', 'pt-BR': 'Definir meta anual' },
+    annualGoalPlaceholder: { 'en-GB': 'Annual goal', 'pt-BR': 'Meta anual' },
+    saveGoal: { 'en-GB': 'Save goal', 'pt-BR': 'Salvar meta' },
+    goalSaved: { 'en-GB': 'Goal saved successfully', 'pt-BR': 'Meta salva com sucesso' },
+    goalSaveFailed: { 'en-GB': 'Failed to save goal', 'pt-BR': 'Falha ao salvar meta' },
+    totalThisYear: { 'en-GB': 'Total this year', 'pt-BR': 'Total este ano' },
+    annualGoal: { 'en-GB': 'Annual goal: {goal}', 'pt-BR': 'Meta anual: {goal}' },
+    noGoalSet: { 'en-GB': 'No goal set', 'pt-BR': 'Nenhuma meta definida' },
+  },
+  language: {
+    selectorLabel: { 'en-GB': 'Language selector', 'pt-BR': 'Seletor de idioma' },
+    englishUk: { 'en-GB': 'British English', 'pt-BR': 'Inglês (Reino Unido)' },
+    portugueseBr: { 'en-GB': 'Portuguese (Brazil)', 'pt-BR': 'Português (Brasil)' },
+  },
+  aria: {
+    userMenu: { 'en-GB': 'User menu', 'pt-BR': 'Menu do usuário' },
+    authentication: { 'en-GB': 'Authentication', 'pt-BR': 'Autenticação' },
   },
 };
 
 const localizedErrorMessages = {
   'pt-BR': {
+    'User not found': 'Usuário não encontrado',
     'Invalid credentials': 'Credenciais inválidas',
     'Login failed': 'Falha ao efetuar login',
     'Registration failed': 'Falha no cadastro',
@@ -181,9 +171,8 @@ export function useI18n() {
   };
 
   const t = (key, params = {}) => {
-    const translation = getPathValue(translations[currentLocale.value], key);
-    const fallback = getPathValue(translations[DEFAULT_LOCALE], key);
-    const resolved = translation ?? fallback ?? key;
+    const node = getPathValue(translations, key);
+    const resolved = node?.[currentLocale.value] ?? node?.[DEFAULT_LOCALE] ?? key;
 
     if (typeof resolved !== 'string') {
       return key;

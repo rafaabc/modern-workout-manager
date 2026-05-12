@@ -10,7 +10,7 @@
         leave-from-class="opacity-100 translate-y-0"
         leave-to-class="opacity-0 -translate-y-2"
       >
-        <div v-if="showRegisteredMessage || showLoggedOutMessage">
+        <div v-if="showRegisteredMessage || showLoggedOutMessage || showPasswordChangedMessage">
           <div
             v-if="showRegisteredMessage"
             class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 relative"
@@ -37,33 +37,24 @@
               &times;
             </button>
           </div>
+          <div
+            v-if="showPasswordChangedMessage"
+            class="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 relative"
+          >
+            <div class="text-center">{{ t('login.passwordChanged') }}</div>
+            <button
+              @click="closePasswordChanged"
+              aria-label="Fechar mensagem de senha alterada"
+              class="absolute right-3 top-1.5 text-emerald-200 hover:text-white font-bold text-lg leading-none"
+            >
+              &times;
+            </button>
+          </div>
         </div>
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.username')
-          }}</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-300 mb-1">{{
-            t('fields.secret')
-          }}</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-          />
-        </div>
+        <FormField id="username" :label="t('fields.username')" v-model="username" required />
+        <FormField id="password" :label="t('fields.secret')" type="password" v-model="password" required />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
         <button
           type="submit"
@@ -78,15 +69,23 @@
           t('auth.register')
         }}</router-link>
       </p>
+      <p class="mt-2 text-center text-gray-400 text-sm">
+        {{ t('login.forgotPassword') }}
+        <router-link to="/change-password" class="text-indigo-400 hover:text-indigo-300 transition">{{
+          t('login.changeIt')
+        }}</router-link>
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore.js';
 import { useI18n } from '../composables/useI18n.js';
+import { useQueryBanner } from '../composables/useQueryBanner.js';
+import FormField from '../components/FormField.vue';
 
 const username = ref('');
 const password = ref('');
@@ -96,56 +95,9 @@ const router = useRouter();
 const authStore = useAuthStore();
 const { localizeError, t } = useI18n();
 
-const showRegisteredMessage = ref(false);
-const showLoggedOutMessage = ref(false);
-// initialize immediately from route query so messages render synchronously
-showRegisteredMessage.value = route.query.registered === '1';
-showLoggedOutMessage.value = route.query.loggedOut === '1';
-let registeredTimer;
-let loggedOutTimer;
-
-onMounted(() => {
-  // Capture query params when arriving at the page and remove them from the URL
-  if (showRegisteredMessage.value) {
-    // keep the query param until the message times out or user closes it
-    registeredTimer = setTimeout(() => {
-      showRegisteredMessage.value = false;
-      const q = { ...route.query };
-      delete q.registered;
-      router.replace({ query: q }).catch(() => {});
-    }, 3000);
-  }
-
-  if (showLoggedOutMessage.value) {
-    loggedOutTimer = setTimeout(() => {
-      showLoggedOutMessage.value = false;
-      const q = { ...route.query };
-      delete q.loggedOut;
-      router.replace({ query: q }).catch(() => {});
-    }, 3000);
-  }
-});
-
-onBeforeUnmount(() => {
-  clearTimeout(registeredTimer);
-  clearTimeout(loggedOutTimer);
-});
-
-function closeRegistered() {
-  clearTimeout(registeredTimer);
-  showRegisteredMessage.value = false;
-  const q = { ...route.query };
-  delete q.registered;
-  router.replace({ query: q }).catch(() => {});
-}
-
-function closeLoggedOut() {
-  clearTimeout(loggedOutTimer);
-  showLoggedOutMessage.value = false;
-  const q = { ...route.query };
-  delete q.loggedOut;
-  router.replace({ query: q }).catch(() => {});
-}
+const { show: showRegisteredMessage, dismiss: closeRegistered } = useQueryBanner(route, router, 'registered');
+const { show: showLoggedOutMessage, dismiss: closeLoggedOut } = useQueryBanner(route, router, 'loggedOut');
+const { show: showPasswordChangedMessage, dismiss: closePasswordChanged } = useQueryBanner(route, router, 'passwordChanged');
 
 async function handleSubmit() {
   error.value = '';

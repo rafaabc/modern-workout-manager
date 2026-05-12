@@ -1,70 +1,46 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mount, flushPromises } from '@vue/test-utils';
-import { createPinia, setActivePinia } from 'pinia';
-import { createRouter, createMemoryHistory } from 'vue-router';
+import { describe, it, expect, vi } from 'vitest';
+import { flushPromises } from '@vue/test-utils';
 import LoginPage from '../../../src/pages/LoginPage.vue';
 import { useAuthStore } from '../../../src/stores/authStore.js';
-import { testPassword } from '../../helpers/testCredentials.js';
-
-function createTestRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/login', component: LoginPage },
-      { path: '/', component: { template: '<div>Dashboard</div>' } },
-      { path: '/register', component: { template: '<div>Register</div>' } },
-    ],
-  });
-}
+import { createPageSetup } from '../../helpers/createPageSetup.js';
 
 describe('LoginPage', () => {
-  let pinia;
-  let router;
-  let pwd;
+  const { ctx, mountPage } = createPageSetup(LoginPage, '/login', [
+    { path: '/', component: { template: '<div>Dashboard</div>' } },
+    { path: '/register', component: { template: '<div>Register</div>' } },
+    { path: '/change-password', component: { template: '<div>ChangePassword</div>' } },
+  ]);
 
-  beforeEach(async () => {
-    pwd = testPassword();
-    pinia = createPinia();
-    setActivePinia(pinia);
-    router = createTestRouter();
-    router.push('/login');
-    await router.isReady();
-    localStorage.clear();
-    vi.restoreAllMocks();
-  });
-
-  function mountLoginPage() {
-    return mount(LoginPage, {
-      global: {
-        plugins: [pinia, router],
-      },
-    });
+  async function mountWithQuery(queryKey) {
+    await ctx.router.push({ path: '/login', query: { [queryKey]: '1' } });
+    await ctx.router.isReady();
+    return mountPage();
   }
 
   it('renders username and password fields', () => {
-    const wrapper = mountLoginPage();
+    const wrapper = mountPage();
     expect(wrapper.find('#username').exists()).toBe(true);
     expect(wrapper.find('#password').exists()).toBe(true);
   });
 
   it('calls authStore.login() with correct values on submit', async () => {
-    const wrapper = mountLoginPage();
+    const wrapper = mountPage();
     const authStore = useAuthStore();
     vi.spyOn(authStore, 'login').mockResolvedValue();
 
     await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
     expect(authStore.login).toHaveBeenCalledWith({
       username: 'testuser',
-      password: pwd,
+      password: ctx.pwd,
     });
   });
 
   it('displays error message when login fails', async () => {
-    const wrapper = mountLoginPage();
+    const wrapper = mountPage();
     const authStore = useAuthStore();
     vi.spyOn(authStore, 'login').mockRejectedValue(new Error('Invalid credentials'));
 
@@ -77,105 +53,60 @@ describe('LoginPage', () => {
   });
 
   it('redirects to / after successful login', async () => {
-    const wrapper = mountLoginPage();
+    const wrapper = mountPage();
     const authStore = useAuthStore();
     vi.spyOn(authStore, 'login').mockResolvedValue();
 
     await wrapper.find('#username').setValue('testuser');
-    await wrapper.find('#password').setValue(pwd);
+    await wrapper.find('#password').setValue(ctx.pwd);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
-    expect(router.currentRoute.value.path).toBe('/');
+    expect(ctx.router.currentRoute.value.path).toBe('/');
   });
 
   it('has a link to /register', () => {
-    const wrapper = mountLoginPage();
-    const link = wrapper.find('a[href="/register"]');
-    expect(link.exists()).toBe(true);
+    const wrapper = mountPage();
+    expect(wrapper.find('a[href="/register"]').exists()).toBe(true);
   });
 
-  it('shows a success message when arriving from completed registration', async () => {
-    await router.push({ path: '/login', query: { registered: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
-
-    expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
+  it('has a link to /change-password', () => {
+    const wrapper = mountPage();
+    expect(wrapper.find('a[href="/change-password"]').exists()).toBe(true);
   });
 
-  it('shows a logout message when arriving from logout redirect', async () => {
-    await router.push({ path: '/login', query: { loggedOut: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
-
-    expect(wrapper.text()).toContain('Logged out successfully');
+  it.each([
+    ['registered',      'Registration completed successfully. You can now sign in.'],
+    ['loggedOut',       'Logged out successfully'],
+    ['passwordChanged', 'Password changed successfully. You can now sign in.'],
+  ])('shows %s message on arrival', async (queryKey, message) => {
+    const wrapper = await mountWithQuery(queryKey);
+    expect(wrapper.text()).toContain(message);
   });
 
-  it('registration message can be dismissed with close button', async () => {
-    await router.push({ path: '/login', query: { registered: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
-    expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
-
-    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de registro"]');
+  it.each([
+    ['registered',      'Registration completed successfully. You can now sign in.', 'Fechar mensagem de registro'],
+    ['loggedOut',       'Logged out successfully',                                    'Fechar mensagem de logout'],
+    ['passwordChanged', 'Password changed successfully. You can now sign in.',        'Fechar mensagem de senha alterada'],
+  ])('%s message can be dismissed with close button', async (queryKey, message, ariaLabel) => {
+    const wrapper = await mountWithQuery(queryKey);
+    const closeBtn = wrapper.find(`button[aria-label="${ariaLabel}"]`);
     expect(closeBtn.exists()).toBe(true);
     await closeBtn.trigger('click');
     await flushPromises();
-
-    expect(wrapper.text()).not.toContain(
-      'Registration completed successfully. You can now sign in.',
-    );
+    expect(wrapper.text()).not.toContain(message);
   });
 
-  it('registration message is removed after timeout and query param cleared', async () => {
-    vi.useFakeTimers();
-    await router.push({ path: '/login', query: { registered: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
-    expect(wrapper.text()).toContain('Registration completed successfully. You can now sign in.');
-
+  it.each([
+    ['registered',      'Registration completed successfully. You can now sign in.'],
+    ['loggedOut',       'Logged out successfully'],
+    ['passwordChanged', 'Password changed successfully. You can now sign in.'],
+  ])('%s message is removed after timeout and query param cleared', async (queryKey, message) => {
+    const wrapper = await mountWithQuery(queryKey);
+    expect(wrapper.text()).toContain(message);
     vi.advanceTimersByTime(3000);
     await flushPromises();
-
-    expect(wrapper.text()).not.toContain(
-      'Registration completed successfully. You can now sign in.',
-    );
-    expect(router.currentRoute.value.query.registered).toBeUndefined();
-    vi.useRealTimers();
-  });
-
-  it('logout message can be dismissed with close button', async () => {
-    await router.push({ path: '/login', query: { loggedOut: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
-    expect(wrapper.text()).toContain('Logged out successfully');
-
-    const closeBtn = wrapper.find('button[aria-label="Fechar mensagem de logout"]');
-    expect(closeBtn.exists()).toBe(true);
-    await closeBtn.trigger('click');
-    await flushPromises();
-
-    expect(wrapper.text()).not.toContain('Logged out successfully');
-  });
-
-  it('logout message is removed after timeout and query param cleared', async () => {
-    vi.useFakeTimers();
-    await router.push({ path: '/login', query: { loggedOut: '1' } });
-    await router.isReady();
-
-    const wrapper = mountLoginPage();
-    expect(wrapper.text()).toContain('Logged out successfully');
-
-    vi.advanceTimersByTime(3000);
-    await flushPromises();
-
-    expect(wrapper.text()).not.toContain('Logged out successfully');
-    expect(router.currentRoute.value.query.loggedOut).toBeUndefined();
-    vi.useRealTimers();
+    expect(wrapper.text()).not.toContain(message);
+    expect(ctx.router.currentRoute.value.query[queryKey]).toBeUndefined();
   });
 });

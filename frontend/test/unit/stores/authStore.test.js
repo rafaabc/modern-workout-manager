@@ -156,6 +156,48 @@ describe('authStore', () => {
     });
   });
 
+  describe('changePassword', () => {
+    it('calls PATCH /api/users/password with correct data', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ message: 'Password updated successfully' }),
+      });
+
+      const store = useAuthStore();
+      await store.changePassword({
+        username: 'testuser',
+        currentPassword: pwd,
+        newPassword: 'Newpass1x9',
+      });
+
+      expect(fetch).toHaveBeenCalledWith('/api/users/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: 'testuser',
+          currentPassword: pwd,
+          newPassword: 'Newpass1x9',
+        }),
+      });
+    });
+
+    it('throws error on API failure', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: false,
+        json: () => Promise.resolve({ error: 'User not found' }),
+      });
+
+      const store = useAuthStore();
+      await expect(
+        store.changePassword({
+          username: 'nobody',
+          currentPassword: pwd,
+          newPassword: 'Newpass1x9',
+        }),
+      ).rejects.toThrow('User not found');
+    });
+  });
+
   describe('activity helpers', () => {
     it('updates last activity and calculates idle time', () => {
       const store = useAuthStore();

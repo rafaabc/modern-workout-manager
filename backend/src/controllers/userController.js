@@ -28,8 +28,7 @@ export function createUserController(userService) {
 
     async changePassword(req, res) {
       try {
-        const { currentPassword, newPassword } = req.body;
-        const { username } = req.user;
+        const { username, currentPassword, newPassword } = req.body;
         await userService.changePassword({ username, currentPassword, newPassword });
         return res.status(200).json({ message: 'Password updated successfully' });
       } catch (err) {
