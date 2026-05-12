@@ -76,6 +76,7 @@ describe('userRepository', () => {
 
       const user = await userRepository.findByUsername('john');
       assert.equal(user.password, updated);
+      assert.notEqual(user.password, original);
     });
 
     it('should do nothing when username does not exist', async () => {
