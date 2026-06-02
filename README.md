@@ -14,7 +14,7 @@ Built by a QA Engineer exploring generative AI as a development and test automat
 
 ## Live demo
 
-`https://modern-workout-manager.onrender.com/`
+`https://modern-workout-manager-frontend.vercel.app`
 
 > Powered by MongoDB Atlas — data persists across restarts.
 
