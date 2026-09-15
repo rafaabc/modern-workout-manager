@@ -51,6 +51,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm rebuild mongodb-memory-server
       - run: npm run test:integration:coverage --workspace=backend
 
   test-api:
@@ -65,4 +66,5 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm rebuild mongodb-memory-server
       - run: npm run test:api --workspace=backend
