@@ -12,9 +12,13 @@ async function hashPassword(password) {
   return `scrypt:${salt}:${derivedKey.toString('hex')}`;
 }
 
+// This function only verifies pre-existing SHA256 hashes created before the scrypt
+// migration; it never hashes a password for storage. A successful verification here
+// immediately triggers a rehash to scrypt in login() (see verifyPassword below), so
+// this path shrinks over time and can be deleted once no legacy hashes remain in Atlas.
 async function verifyLegacySha256(password, salt, hash) {
   const candidate = createHash('sha256')
-    .update(salt + password)
+    .update(salt + password) // lgtm[js/insufficient-password-hash]
     .digest('hex');
   const hashBuffer = Buffer.from(hash, 'hex');
   const candidateBuffer = Buffer.from(candidate, 'hex');
