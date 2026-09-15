@@ -17,6 +17,9 @@ on:
       - '.github/workflows/backend.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
