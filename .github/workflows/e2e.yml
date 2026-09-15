@@ -20,11 +20,11 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(node -p "require('./frontend/node_modules/@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -35,11 +35,11 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx --prefix frontend playwright install --with-deps chromium
+        run: node_modules/.bin/playwright install --with-deps chromium
 
       - name: Install Playwright system deps
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx --prefix frontend playwright install-deps chromium
+        run: node_modules/.bin/playwright install-deps chromium
 
       - name: Validate required secrets
         env:
@@ -72,7 +72,7 @@ jobs:
         run: npm run start:frontend > /tmp/frontend.log 2>&1 &
 
       - name: Wait for services to be ready
-        run: npx wait-on http://localhost:3000/api-docs http://localhost:5173 --timeout 60000 || (echo "=== Backend Log ===" && cat /tmp/backend.log && echo "=== Frontend Log ===" && cat /tmp/frontend.log && exit 1)
+        run: node_modules/.bin/wait-on http://localhost:3000/api-docs http://localhost:5173 --timeout 60000 || (echo "=== Backend Log ===" && cat /tmp/backend.log && echo "=== Frontend Log ===" && cat /tmp/frontend.log && exit 1)
 
       - name: Run E2E tests
         run: npm run test:e2e
