@@ -17,6 +17,8 @@ async function hashPassword(password) {
 // immediately triggers a rehash to scrypt in login() (see verifyPassword below), so
 // this path shrinks over time and can be deleted once no legacy hashes remain in Atlas.
 async function verifyLegacySha256(password, salt, hash) {
+  // Legacy compatibility only: successful verification is immediately migrated to scrypt.
+  // codeql[js/insufficient-password-hash]
   const candidate = createHash('sha256')
     .update(salt + password)
     .digest('hex');
