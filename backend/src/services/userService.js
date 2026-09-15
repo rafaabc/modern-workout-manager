@@ -121,7 +121,7 @@ export function createUserService(userRepository) {
       return { token };
     },
 
-    async changePassword({ username, newPassword }) {
+    async changePassword({ username, currentPassword, newPassword }) {
       const usernameValidation = validateUsername(username);
       if (!usernameValidation.valid) {
         const error = new Error(usernameValidation.error);
@@ -140,6 +140,18 @@ export function createUserService(userRepository) {
       if (!user) {
         const error = new Error('User not found');
         error.status = 404;
+        throw error;
+      }
+
+      if (!currentPassword || !(await verifyPassword(currentPassword, user.password))) {
+        const error = new Error('Invalid credentials');
+        error.status = 401;
+        throw error;
+      }
+
+      if (currentPassword === newPassword) {
+        const error = new Error('New password must be different from current password');
+        error.status = 400;
         throw error;
       }
 

@@ -157,41 +157,53 @@ describe('authStore', () => {
   });
 
   describe('changePassword', () => {
-    it('calls PATCH /api/users/password with correct data', async () => {
+    it('calls PATCH /api/users/password with correct data and an Authorization header', async () => {
+      const store = useAuthStore();
+      store.token = 'valid-token';
+
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Password updated successfully' }),
       });
 
-      const store = useAuthStore();
       await store.changePassword({
-        username: 'testuser',
+        currentPassword: pwd,
         newPassword: 'Newpass1x9',
       });
 
       expect(fetch).toHaveBeenCalledWith('/api/users/password', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer valid-token',
+        },
         body: JSON.stringify({
-          username: 'testuser',
+          currentPassword: pwd,
           newPassword: 'Newpass1x9',
         }),
       });
     });
 
-    it('throws error on API failure', async () => {
+    // A wrong current password is a 401 from this endpoint, but must surface as an
+    // inline form error rather than trigger the global session-expired handling
+    // useApi() applies to every other 401 - see the comment on doChangePassword.
+    it('throws the API error message (not a generic Unauthorized) on a 401 wrong-password response', async () => {
+      const store = useAuthStore();
+      store.token = 'valid-token';
+
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: false,
-        json: () => Promise.resolve({ error: 'User not found' }),
+        status: 401,
+        json: () => Promise.resolve({ error: 'Invalid credentials' }),
       });
 
-      const store = useAuthStore();
       await expect(
         store.changePassword({
-          username: 'nobody',
+          currentPassword: 'WrongPassword1',
           newPassword: 'Newpass1x9',
         }),
-      ).rejects.toThrow('User not found');
+      ).rejects.toThrow('Invalid credentials');
+      expect(store.isAuthenticated).toBe(true);
     });
   });
 

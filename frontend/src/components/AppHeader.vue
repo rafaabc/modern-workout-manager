@@ -54,6 +54,12 @@
           <span class="username text-gray-300">{{
             authStore.user?.username || t('userFallback')
           }}</span>
+          <router-link
+            to="/change-password"
+            class="change-password-link text-gray-400 hover:text-white transition"
+          >
+            {{ t('changePassword.title') }}
+          </router-link>
           <button
             class="logout-button text-gray-400 hover:text-white transition"
             @click="handleLogout"

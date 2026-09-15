@@ -70,14 +70,9 @@ describe('LoginPage', () => {
     expect(wrapper.find('a[href="/register"]').exists()).toBe(true);
   });
 
-  it('has a link to /change-password', () => {
-    const wrapper = mountPage();
-    expect(wrapper.find('a[href="/change-password"]').exists()).toBe(true);
-  });
-
   it.each([
-    ['registered',      'Registration completed successfully. You can now sign in.'],
-    ['loggedOut',       'Logged out successfully'],
+    ['registered', 'Registration completed successfully. You can now sign in.'],
+    ['loggedOut', 'Logged out successfully'],
     ['passwordChanged', 'Password changed successfully. You can now sign in.'],
   ])('shows %s message on arrival', async (queryKey, message) => {
     const wrapper = await mountWithQuery(queryKey);
@@ -85,9 +80,17 @@ describe('LoginPage', () => {
   });
 
   it.each([
-    ['registered',      'Registration completed successfully. You can now sign in.', 'Fechar mensagem de registro'],
-    ['loggedOut',       'Logged out successfully',                                    'Fechar mensagem de logout'],
-    ['passwordChanged', 'Password changed successfully. You can now sign in.',        'Fechar mensagem de senha alterada'],
+    [
+      'registered',
+      'Registration completed successfully. You can now sign in.',
+      'Fechar mensagem de registro',
+    ],
+    ['loggedOut', 'Logged out successfully', 'Fechar mensagem de logout'],
+    [
+      'passwordChanged',
+      'Password changed successfully. You can now sign in.',
+      'Fechar mensagem de senha alterada',
+    ],
   ])('%s message can be dismissed with close button', async (queryKey, message, ariaLabel) => {
     const wrapper = await mountWithQuery(queryKey);
     const closeBtn = wrapper.find(`button[aria-label="${ariaLabel}"]`);
@@ -98,8 +101,8 @@ describe('LoginPage', () => {
   });
 
   it.each([
-    ['registered',      'Registration completed successfully. You can now sign in.'],
-    ['loggedOut',       'Logged out successfully'],
+    ['registered', 'Registration completed successfully. You can now sign in.'],
+    ['loggedOut', 'Logged out successfully'],
     ['passwordChanged', 'Password changed successfully. You can now sign in.'],
   ])('%s message is removed after timeout and query param cleared', async (queryKey, message) => {
     const wrapper = await mountWithQuery(queryKey);
