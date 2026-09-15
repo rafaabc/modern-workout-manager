@@ -23,9 +23,9 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^15.4.3",
-    "prettier": "^3.5.3",
-    "wait-on": "^9.0.4"
+    "lint-staged": "^17.5.1",
+    "prettier": "^3.9.6",
+    "wait-on": "^9.1.0"
   },
   "lint-staged": {
     "backend/**/*.js": [
