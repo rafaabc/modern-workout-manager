@@ -16,8 +16,37 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
-    # Major version bumps are excluded from the groups above so each one
-    # still opens its own PR for individual review.
+      frontend-build-tooling-major:
+        patterns:
+          - 'vite'
+          - '@vitejs/plugin-vue'
+        update-types:
+          - 'major'
+      frontend-test-tooling-major:
+        patterns:
+          - 'vitest'
+          - '@vitest/coverage-v8'
+        update-types:
+          - 'major'
+      frontend-runtime-major:
+        patterns:
+          - 'vue'
+          - 'vue-router'
+          - 'pinia'
+        update-types:
+          - 'major'
+      linting-major:
+        patterns:
+          - 'eslint'
+          - 'eslint-plugin-vue'
+          - 'eslint-plugin-security'
+        update-types:
+          - 'major'
+      backend-test-tooling-major:
+        patterns:
+          - 'mongodb-memory-server'
+        update-types:
+          - 'major'
 
   - package-ecosystem: 'github-actions'
     directory: '/'

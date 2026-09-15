@@ -9,6 +9,7 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
+      globals: globals.browser,
     },
   },
   // Config files run in Node.js — provide Node globals so `process` etc. are recognised
