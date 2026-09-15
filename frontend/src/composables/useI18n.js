@@ -35,8 +35,6 @@ const translations = {
       'en-GB': 'Password changed successfully. You can now sign in.',
       'pt-BR': 'Senha alterada com sucesso. Você já pode entrar.',
     },
-    forgotPassword: { 'en-GB': 'Forgot your password?', 'pt-BR': 'Esqueceu sua senha?' },
-    changeIt: { 'en-GB': 'Change it', 'pt-BR': 'Altere aqui' },
   },
   register: {
     title: { 'en-GB': 'Register', 'pt-BR': 'Cadastrar' },
@@ -84,7 +82,7 @@ const translations = {
       'en-GB': 'Password changed. Redirecting to login...',
       'pt-BR': 'Senha alterada. Redirecionando...',
     },
-    backToLogin: { 'en-GB': 'Back to login', 'pt-BR': 'Voltar para o login' },
+    cancel: { 'en-GB': 'Cancel', 'pt-BR': 'Cancelar' },
   },
   metrics: {
     title: { 'en-GB': 'Workout Metrics', 'pt-BR': 'Métricas de treino' },
@@ -130,6 +128,8 @@ const localizedErrorMessages = {
     'Logged out successfully': 'Desconectado com sucesso',
     [`${EN_PASS_LABEL} must be at least 8 characters`]: `${PT_PASS_LABEL} deve ter pelo menos 8 caracteres`,
     [`${EN_PASS_LABEL} must contain letters and numbers`]: `${PT_PASS_LABEL} deve conter letras e números`,
+    'New password must be different from current password':
+      'A nova senha deve ser diferente da senha atual',
   },
 };
 

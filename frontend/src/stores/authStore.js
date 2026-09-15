@@ -108,11 +108,19 @@ async function doLogout(token, user) {
   clearStoredSession();
 }
 
-async function doChangePassword({ username, newPassword }) {
+// Deliberately not routed through useApi()'s shared request(): that client treats
+// every 401 as an expired/invalid session and force-logs-out + redirects to /login.
+// Here a 401 means "wrong current password" and must surface as an inline form
+// error instead, so this endpoint is called directly with its own Authorization
+// header.
+async function doChangePassword(token, { currentPassword, newPassword }) {
   const response = await fetch('/api/users/password', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, newPassword }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token.value}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
   });
 
   if (!response.ok) {
@@ -172,7 +180,7 @@ export const useAuthStore = defineStore('auth', () => {
   const login = (credentials) => doLogin(token, user, credentials);
   const register = (credentials) => doRegister(credentials);
   const logout = () => doLogout(token, user);
-  const changePassword = (credentials) => doChangePassword(credentials);
+  const changePassword = (credentials) => doChangePassword(token, credentials);
 
   return {
     token,

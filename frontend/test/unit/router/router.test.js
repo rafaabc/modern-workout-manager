@@ -27,30 +27,29 @@ describe('Router navigation guards', () => {
     expect(router.currentRoute.value.path).toBe('/login');
   });
 
-  it.each(['/login', '/register', '/change-password'])(
-    'allows access to %s when not authenticated',
-    async (path) => {
-      await router.push(path);
-      expect(router.currentRoute.value.path).toBe(path);
-    },
-  );
+  it.each(['/login', '/register'])('allows access to %s when not authenticated', async (path) => {
+    await router.push(path);
+    expect(router.currentRoute.value.path).toBe(path);
+  });
 
-  it('allows access to / when authenticated', async () => {
+  it('redirects to /login when accessing /change-password without auth', async () => {
+    await router.push('/change-password');
+    expect(router.currentRoute.value.path).toBe('/login');
+  });
+
+  it.each(['/', '/change-password'])('allows access to %s when authenticated', async (path) => {
     const authStore = useAuthStore();
     authStore.token = 'valid-token';
 
-    await router.push('/');
-    expect(router.currentRoute.value.path).toBe('/');
+    await router.push(path);
+    expect(router.currentRoute.value.path).toBe(path);
   });
 
-  it.each(['/login', '/change-password'])(
-    'redirects to / when accessing %s while authenticated',
-    async (path) => {
-      const authStore = useAuthStore();
-      authStore.token = 'valid-token';
+  it('redirects to / when accessing /login while authenticated', async () => {
+    const authStore = useAuthStore();
+    authStore.token = 'valid-token';
 
-      await router.push(path);
-      expect(router.currentRoute.value.path).toBe('/');
-    },
-  );
+    await router.push('/login');
+    expect(router.currentRoute.value.path).toBe('/');
+  });
 });

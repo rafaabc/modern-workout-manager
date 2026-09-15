@@ -1,7 +1,9 @@
 <template>
   <div class="change-password-page min-h-screen bg-gray-950 flex items-center justify-center px-4">
     <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-8 w-full max-w-md">
-      <h1 class="text-2xl font-bold text-white mb-6 text-center">{{ t('changePassword.title') }}</h1>
+      <h1 class="text-2xl font-bold text-white mb-6 text-center">
+        {{ t('changePassword.title') }}
+      </h1>
       <Transition
         enter-active-class="transition duration-300 ease-out"
         enter-from-class="opacity-0 -translate-y-2"
@@ -18,9 +20,27 @@
         </div>
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <FormField id="username" :label="t('fields.username')" v-model="username" required />
-        <FormField id="new-password" :label="t('fields.newPassword')" type="password" v-model="newPassword" required />
-        <FormField id="confirm-new-password" :label="t('fields.confirmNewPassword')" type="password" v-model="confirmNewPassword" required />
+        <FormField
+          id="current-password"
+          :label="t('fields.currentPassword')"
+          type="password"
+          v-model="currentPassword"
+          required
+        />
+        <FormField
+          id="new-password"
+          :label="t('fields.newPassword')"
+          type="password"
+          v-model="newPassword"
+          required
+        />
+        <FormField
+          id="confirm-new-password"
+          :label="t('fields.confirmNewPassword')"
+          type="password"
+          v-model="confirmNewPassword"
+          required
+        />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
         <button
           type="submit"
@@ -38,8 +58,8 @@
         </button>
       </form>
       <p class="mt-4 text-center text-gray-400 text-sm">
-        <router-link to="/login" class="text-indigo-400 hover:text-indigo-300 transition">{{
-          t('changePassword.backToLogin')
+        <router-link to="/" class="text-indigo-400 hover:text-indigo-300 transition">{{
+          t('changePassword.cancel')
         }}</router-link>
       </p>
     </div>
@@ -53,7 +73,7 @@ import { useAuthStore } from '../stores/authStore.js';
 import { useI18n } from '../composables/useI18n.js';
 import FormField from '../components/FormField.vue';
 
-const username = ref('');
+const currentPassword = ref('');
 const newPassword = ref('');
 const confirmNewPassword = ref('');
 const error = ref('');
@@ -81,6 +101,10 @@ function validate() {
     error.value = t('validation.passwordsDoNotMatch');
     return false;
   }
+  if (newPassword.value === currentPassword.value) {
+    error.value = t('validation.newPasswordSameAsCurrent');
+    return false;
+  }
   return true;
 }
 
@@ -93,11 +117,12 @@ async function handleSubmit() {
 
   try {
     await authStore.changePassword({
-      username: username.value,
+      currentPassword: currentPassword.value,
       newPassword: newPassword.value,
     });
     successMessage.value = t('changePassword.successRedirect');
-    redirectTimer = setTimeout(() => {
+    redirectTimer = setTimeout(async () => {
+      await authStore.logout();
       router.push({ path: '/login', query: { passwordChanged: '1' } });
     }, 1400);
   } catch (err) {

@@ -149,6 +149,7 @@ describe('userService', () => {
       await assert.doesNotReject(() =>
         userService.changePassword({
           username: 'john',
+          currentPassword: validPassword,
           newPassword: anotherPassword,
         }),
       );
@@ -157,6 +158,7 @@ describe('userService', () => {
     it('should allow login with new password after change', async () => {
       await userService.changePassword({
         username: 'john',
+        currentPassword: validPassword,
         newPassword: anotherPassword,
       });
 
@@ -167,6 +169,7 @@ describe('userService', () => {
     it('should reject login with old password after change', async () => {
       await userService.changePassword({
         username: 'john',
+        currentPassword: validPassword,
         newPassword: anotherPassword,
       });
 
@@ -174,6 +177,37 @@ describe('userService', () => {
         () => userService.login({ username: 'john', password: validPassword }),
         (err) => {
           assert.equal(err.status, 401);
+          return true;
+        },
+      );
+    });
+
+    it('should throw 401 for wrong current password', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'john',
+            currentPassword: wrongPassword,
+            newPassword: anotherPassword,
+          }),
+        (err) => {
+          assert.equal(err.status, 401);
+          return true;
+        },
+      );
+    });
+
+    it('should throw 400 when new password equals current password', async () => {
+      await assert.rejects(
+        () =>
+          userService.changePassword({
+            username: 'john',
+            currentPassword: validPassword,
+            newPassword: validPassword,
+          }),
+        (err) => {
+          assert.equal(err.status, 400);
+          assert.match(err.message, /must be different from current password/);
           return true;
         },
       );
@@ -250,6 +284,30 @@ describe('userService', () => {
           return true;
         },
       );
+    });
+  });
+
+  describe('legacy password hash migration', () => {
+    it('should verify a legacy SHA256 hash and transparently rehash it to scrypt on login', async () => {
+      const legacyPassword = 'LegacyPass1';
+      const legacyHash = 'a6cc9340e292744805fde4ca40e70288b31852c4eb2b0d96853bd7df709d2ce0';
+      mockRepo._users.push({
+        id: '99',
+        username: 'legacyuser',
+        password: `0123456789abcdef0123456789abcdef:${legacyHash}`,
+      });
+
+      const result = await userService.login({ username: 'legacyuser', password: legacyPassword });
+      assert.ok(result.token);
+
+      const stored = mockRepo._users.find((u) => u.username === 'legacyuser').password;
+      assert.match(stored, /^scrypt:/);
+
+      const secondLogin = await userService.login({
+        username: 'legacyuser',
+        password: legacyPassword,
+      });
+      assert.ok(secondLogin.token);
     });
   });
 

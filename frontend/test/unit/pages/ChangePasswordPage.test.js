@@ -14,8 +14,11 @@ describe('ChangePasswordPage', () => {
     newPwd = testPassword();
   });
 
-  async function fillAndSubmit(wrapper, { newPassword = newPwd, confirmPassword = newPwd } = {}) {
-    await wrapper.find('#username').setValue('testuser');
+  async function fillAndSubmit(
+    wrapper,
+    { currentPassword = 'CurrentPass1', newPassword = newPwd, confirmPassword = newPwd } = {},
+  ) {
+    await wrapper.find('#current-password').setValue(currentPassword);
     await wrapper.find('#new-password').setValue(newPassword);
     await wrapper.find('#confirm-new-password').setValue(confirmPassword);
     await wrapper.find('form').trigger('submit');
@@ -24,17 +27,34 @@ describe('ChangePasswordPage', () => {
 
   it('renders three fields and submit button', () => {
     const wrapper = mountPage();
-    expect(wrapper.find('#username').exists()).toBe(true);
-    expect(wrapper.find('#current-password').exists()).toBe(false);
+    expect(wrapper.find('#username').exists()).toBe(false);
+    expect(wrapper.find('#current-password').exists()).toBe(true);
     expect(wrapper.find('#new-password').exists()).toBe(true);
     expect(wrapper.find('#confirm-new-password').exists()).toBe(true);
     expect(wrapper.find('button[type="submit"]').exists()).toBe(true);
   });
 
   it.each([
-    ['passwords do not match',      () => ({ confirmPassword: 'Different1x9' }),                      'Passwords do not match'],
-    ['new password is too short',   () => ({ newPassword: 'Short1', confirmPassword: 'Short1' }),      'Password must be at least 8 characters'],
-    ['new password has no numbers', () => ({ newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' }), 'Password must contain letters and numbers'],
+    [
+      'passwords do not match',
+      () => ({ confirmPassword: 'Different1x9' }),
+      'Passwords do not match',
+    ],
+    [
+      'new password is too short',
+      () => ({ newPassword: 'Short1', confirmPassword: 'Short1' }),
+      'Password must be at least 8 characters',
+    ],
+    [
+      'new password has no numbers',
+      () => ({ newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' }),
+      'Password must contain letters and numbers',
+    ],
+    [
+      'new password equals current',
+      () => ({ newPassword: 'CurrentPass1', confirmPassword: 'CurrentPass1' }),
+      'New password must be different from current password',
+    ],
   ])('blocks submit when %s', async (_label, getInput, errorMsg) => {
     const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'changePassword');
     await fillAndSubmit(wrapper, getInput());
@@ -46,18 +66,20 @@ describe('ChangePasswordPage', () => {
     const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'changePassword');
     await fillAndSubmit(wrapper);
     expect(authStore.changePassword).toHaveBeenCalledWith({
-      username: 'testuser',
+      currentPassword: 'CurrentPass1',
       newPassword: newPwd,
     });
   });
 
   it('shows success feedback then redirects to /login?passwordChanged=1', async () => {
-    const { wrapper } = mountWithAuthSpy(mountPage, 'changePassword');
+    const { wrapper, authStore } = mountWithAuthSpy(mountPage, 'changePassword');
+    vi.spyOn(authStore, 'logout').mockResolvedValue();
     await fillAndSubmit(wrapper);
     expect(wrapper.find('.success').exists()).toBe(true);
     expect(ctx.router.currentRoute.value.path).toBe('/change-password');
     vi.advanceTimersByTime(1400);
     await flushPromises();
+    expect(authStore.logout).toHaveBeenCalled();
     expect(ctx.router.currentRoute.value.path).toBe('/login');
     expect(ctx.router.currentRoute.value.query.passwordChanged).toBe('1');
   });
@@ -75,7 +97,10 @@ describe('ChangePasswordPage', () => {
     const authStore = useAuthStore();
     let resolveChange;
     vi.spyOn(authStore, 'changePassword').mockImplementation(
-      () => new Promise((r) => { resolveChange = r; }),
+      () =>
+        new Promise((r) => {
+          resolveChange = r;
+        }),
     );
     await fillAndSubmit(wrapper);
     expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeDefined();
@@ -83,9 +108,9 @@ describe('ChangePasswordPage', () => {
     await flushPromises();
   });
 
-  it('has a link to /login', () => {
+  it('has a cancel link back to the dashboard', () => {
     const wrapper = mountPage();
-    expect(wrapper.find('a[href="/login"]').exists()).toBe(true);
+    expect(wrapper.find('a[href="/"]').exists()).toBe(true);
   });
 
   it('clears the pending redirect timer when unmounted', async () => {

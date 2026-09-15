@@ -28,8 +28,15 @@ export function createUserController(userService) {
 
     async changePassword(req, res) {
       try {
-        const { username, newPassword } = req.body;
-        await userService.changePassword({ username, newPassword });
+        const { currentPassword, newPassword } = req.body;
+        // Identity comes from the verified token, never from the request body -
+        // otherwise an authenticated user could change any other account's password
+        // by putting a different username in the body.
+        await userService.changePassword({
+          username: req.user.username,
+          currentPassword,
+          newPassword,
+        });
         return res.status(200).json({ message: 'Password updated successfully' });
       } catch (err) {
         const status = err.status || 500;

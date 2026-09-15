@@ -127,6 +127,7 @@ describe('Auth API', () => {
     const originalPassword = randomPassword();
     const newValidPassword = randomPassword();
     const anotherPassword = randomPassword();
+    let token;
 
     before(async () => {
       await fetch(`${baseUrl}/api/users/register`, {
@@ -134,16 +135,88 @@ describe('Auth API', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'changeuser', password: originalPassword }),
       });
+
+      const loginRes = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'changeuser', password: originalPassword }),
+      });
+      ({ token } = await loginRes.json());
+    });
+
+    it('should return 401 without a token', async () => {
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: originalPassword, newPassword: anotherPassword }),
+      });
+      assert.equal(res.status, 401);
+    });
+
+    it('should return 401 for wrong current password', async () => {
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: 'WrongPassword1', newPassword: anotherPassword }),
+      });
+      assert.equal(res.status, 401);
+      const body = await res.json();
+      assert.ok(body.error);
+    });
+
+    it("should not let a token change a different account's password via a body username", async () => {
+      await fetch(`${baseUrl}/api/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'victimuser', password: originalPassword }),
+      });
+
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          username: 'victimuser',
+          currentPassword: originalPassword,
+          newPassword: anotherPassword,
+        }),
+      });
+      // Succeeds, but against the caller's own account (changeuser) - the body
+      // username is ignored, so victimuser's password is untouched.
+      assert.equal(res.status, 200);
+
+      const victimLoginRes = await fetch(`${baseUrl}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'victimuser', password: originalPassword }),
+      });
+      assert.equal(victimLoginRes.status, 200);
+
+      // Revert the incidental change to changeuser's own password made above so the
+      // remaining tests in this block can rely on originalPassword still being valid.
+      const revertRes = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: anotherPassword, newPassword: originalPassword }),
+      });
+      assert.equal(revertRes.status, 200);
+    });
+
+    it('should return 400 for invalid new password', async () => {
+      const res = await fetch(`${baseUrl}/api/users/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: originalPassword, newPassword: 'weak' }),
+      });
+      assert.equal(res.status, 400);
+      const body = await res.json();
+      assert.ok(body.error);
     });
 
     it('should return 200 and update the password', async () => {
       const res = await fetch(`${baseUrl}/api/users/password`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: 'changeuser',
-          newPassword: newValidPassword,
-        }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: originalPassword, newPassword: newValidPassword }),
       });
 
       assert.equal(res.status, 200);
@@ -169,45 +242,6 @@ describe('Auth API', () => {
       assert.equal(res.status, 200);
       const body = await res.json();
       assert.ok(body.token);
-    });
-
-    it('should return 400 when username is missing', async () => {
-      const res = await fetch(`${baseUrl}/api/users/password`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword: anotherPassword }),
-      });
-      assert.equal(res.status, 400);
-      const body = await res.json();
-      assert.ok(body.error);
-    });
-
-    it('should return 404 for non-existent username', async () => {
-      const res = await fetch(`${baseUrl}/api/users/password`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: 'nobody',
-          newPassword: anotherPassword,
-        }),
-      });
-      assert.equal(res.status, 404);
-      const body = await res.json();
-      assert.ok(body.error);
-    });
-
-    it('should return 400 for invalid new password', async () => {
-      const res = await fetch(`${baseUrl}/api/users/password`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: 'changeuser',
-          newPassword: 'weak',
-        }),
-      });
-      assert.equal(res.status, 400);
-      const body = await res.json();
-      assert.ok(body.error);
     });
   });
 });

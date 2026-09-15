@@ -54,7 +54,13 @@
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <FormField id="username" :label="t('fields.username')" v-model="username" required />
-        <FormField id="password" :label="t('fields.secret')" type="password" v-model="password" required />
+        <FormField
+          id="password"
+          :label="t('fields.secret')"
+          type="password"
+          v-model="password"
+          required
+        />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
         <button
           type="submit"
@@ -67,12 +73,6 @@
         {{ t('login.noAccount') }}
         <router-link to="/register" class="text-indigo-400 hover:text-indigo-300 transition">{{
           t('auth.register')
-        }}</router-link>
-      </p>
-      <p class="mt-2 text-center text-gray-400 text-sm">
-        {{ t('login.forgotPassword') }}
-        <router-link to="/change-password" class="text-indigo-400 hover:text-indigo-300 transition">{{
-          t('login.changeIt')
         }}</router-link>
       </p>
     </div>
@@ -95,9 +95,21 @@ const router = useRouter();
 const authStore = useAuthStore();
 const { localizeError, t } = useI18n();
 
-const { show: showRegisteredMessage, dismiss: closeRegistered } = useQueryBanner(route, router, 'registered');
-const { show: showLoggedOutMessage, dismiss: closeLoggedOut } = useQueryBanner(route, router, 'loggedOut');
-const { show: showPasswordChangedMessage, dismiss: closePasswordChanged } = useQueryBanner(route, router, 'passwordChanged');
+const { show: showRegisteredMessage, dismiss: closeRegistered } = useQueryBanner(
+  route,
+  router,
+  'registered',
+);
+const { show: showLoggedOutMessage, dismiss: closeLoggedOut } = useQueryBanner(
+  route,
+  router,
+  'loggedOut',
+);
+const { show: showPasswordChangedMessage, dismiss: closePasswordChanged } = useQueryBanner(
+  route,
+  router,
+  'passwordChanged',
+);
 
 async function handleSubmit() {
   error.value = '';

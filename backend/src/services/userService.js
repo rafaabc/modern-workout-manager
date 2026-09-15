@@ -17,6 +17,8 @@ async function hashPassword(password) {
 // immediately triggers a rehash to scrypt in login() (see verifyPassword below), so
 // this path shrinks over time and can be deleted once no legacy hashes remain in Atlas.
 async function verifyLegacySha256(password, salt, hash) {
+  // Legacy compatibility only: successful verification is immediately migrated to scrypt.
+  // lgtm[js/insufficient-password-hash]
   const candidate = createHash('sha256')
     .update(salt + password)
     .digest('hex');
@@ -121,7 +123,7 @@ export function createUserService(userRepository) {
       return { token };
     },
 
-    async changePassword({ username, newPassword }) {
+    async changePassword({ username, currentPassword, newPassword }) {
       const usernameValidation = validateUsername(username);
       if (!usernameValidation.valid) {
         const error = new Error(usernameValidation.error);
@@ -140,6 +142,18 @@ export function createUserService(userRepository) {
       if (!user) {
         const error = new Error('User not found');
         error.status = 404;
+        throw error;
+      }
+
+      if (!currentPassword || !(await verifyPassword(currentPassword, user.password))) {
+        const error = new Error('Invalid credentials');
+        error.status = 401;
+        throw error;
+      }
+
+      if (currentPassword === newPassword) {
+        const error = new Error('New password must be different from current password');
+        error.status = 400;
         throw error;
       }
 
