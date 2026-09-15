@@ -18,7 +18,7 @@ async function hashPassword(password) {
 // this path shrinks over time and can be deleted once no legacy hashes remain in Atlas.
 async function verifyLegacySha256(password, salt, hash) {
   const candidate = createHash('sha256')
-    .update(salt + password) // lgtm[js/insufficient-password-hash]
+    .update(salt + password)
     .digest('hex');
   const hashBuffer = Buffer.from(hash, 'hex');
   const candidateBuffer = Buffer.from(candidate, 'hex');
