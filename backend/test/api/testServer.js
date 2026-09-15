@@ -14,6 +14,7 @@ export function createTestServer() {
 
   return {
     async start() {
+      process.env.NODE_ENV = 'test';
       delete process.env.MONGODB_URI;
       mongod = await MongoMemoryServer.create();
       const uri = mongod.getUri();
