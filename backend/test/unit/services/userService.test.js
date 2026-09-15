@@ -289,14 +289,15 @@ describe('userService', () => {
 
   describe('legacy password hash migration', () => {
     it('should verify a legacy SHA256 hash and transparently rehash it to scrypt on login', async () => {
-      const { createHash, randomBytes } = await import('node:crypto');
-      const salt = randomBytes(16).toString('hex');
-      const legacyHash = createHash('sha256')
-        .update(salt + validPassword)
-        .digest('hex');
-      mockRepo._users.push({ id: '99', username: 'legacyuser', password: `${salt}:${legacyHash}` });
+      const legacyPassword = 'LegacyPass1';
+      const legacyHash = 'a6cc9340e292744805fde4ca40e70288b31852c4eb2b0d96853bd7df709d2ce0';
+      mockRepo._users.push({
+        id: '99',
+        username: 'legacyuser',
+        password: `0123456789abcdef0123456789abcdef:${legacyHash}`,
+      });
 
-      const result = await userService.login({ username: 'legacyuser', password: validPassword });
+      const result = await userService.login({ username: 'legacyuser', password: legacyPassword });
       assert.ok(result.token);
 
       const stored = mockRepo._users.find((u) => u.username === 'legacyuser').password;
@@ -304,7 +305,7 @@ describe('userService', () => {
 
       const secondLogin = await userService.login({
         username: 'legacyuser',
-        password: validPassword,
+        password: legacyPassword,
       });
       assert.ok(secondLogin.token);
     });
