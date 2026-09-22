@@ -16,7 +16,7 @@
     "generate-pwa-assets": "pwa-assets-generator --config pwa-assets.config.js"
   },
   "dependencies": {
-    "pinia": "^3.0.4",
+    "pinia": "^4.0.3",
     "vue": "^3.5.42",
     "vue-router": "^5.3.1"
   },
