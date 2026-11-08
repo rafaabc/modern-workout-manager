@@ -45,7 +45,7 @@
         <button
           type="submit"
           :disabled="isSubmitting || Boolean(successMessage)"
-          class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg"
+          class="w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg"
           :class="{ 'cursor-not-allowed opacity-70': isSubmitting || successMessage }"
         >
           {{

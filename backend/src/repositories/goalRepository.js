@@ -13,7 +13,7 @@ export function createGoalRepository() {
       const doc = await Goal.findOneAndUpdate(
         { userId: new mongoose.Types.ObjectId(userId) },
         { goal: Number(goal), year: Number(year) },
-        { upsert: true, new: true },
+        { upsert: true, returnDocument: 'after' },
       ).lean();
       return { ...doc, id: doc._id.toString() };
     },

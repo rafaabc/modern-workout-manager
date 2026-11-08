@@ -80,7 +80,7 @@ export function createApp() {
 
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(join(__dirname, '../../frontend/dist')));
-    app.get('*', generalLimiter, (req, res) => {
+    app.get('/{*splat}', generalLimiter, (req, res) => {
       res.sendFile(join(__dirname, '../../frontend/dist/index.html'));
     });
   }

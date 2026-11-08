@@ -8,6 +8,9 @@
     "frontend"
   ],
   "license": "MIT",
+  "overrides": {
+    "minimatch": "^11.0.1"
+  },
   "scripts": {
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write .",

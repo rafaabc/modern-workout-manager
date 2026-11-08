@@ -71,7 +71,7 @@
       <div v-if="metrics.goalProgress !== null" class="annual-progress mb-6">
         <div class="progress-bar w-full bg-gray-700 rounded-full h-3 mb-1 relative overflow-hidden">
           <div
-            class="progress-fill bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500"
+            class="progress-fill bg-linear-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500"
             :style="{ width: Math.min(metrics.goalProgress, 100) + '%' }"
           ></div>
           <div

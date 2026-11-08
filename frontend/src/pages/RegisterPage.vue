@@ -20,12 +20,18 @@
       </Transition>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <FormField id="username" :label="t('fields.username')" v-model="username" required />
-        <FormField id="password" :label="t('fields.secret')" type="password" v-model="password" required />
+        <FormField
+          id="password"
+          :label="t('fields.secret')"
+          type="password"
+          v-model="password"
+          required
+        />
         <p v-if="error" class="error text-red-400 text-sm mt-3 text-center">{{ error }}</p>
         <button
           type="submit"
           :disabled="isSubmitting || Boolean(successMessage)"
-          class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg"
+          class="w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg"
           :class="{ 'cursor-not-allowed opacity-70': isSubmitting || successMessage }"
         >
           {{
