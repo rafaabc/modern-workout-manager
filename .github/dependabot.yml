@@ -4,7 +4,7 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     groups:
       security-updates:
         applies-to: security-updates
@@ -20,58 +20,40 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
-      frontend-build-tooling-major:
+      major-frontend:
         patterns:
           - 'vite'
           - '@vitejs/plugin-vue'
-        update-types:
-          - 'major'
-      frontend-test-tooling-major:
-        patterns:
           - 'vitest'
           - '@vitest/coverage-v8'
-        update-types:
-          - 'major'
-      frontend-runtime-major:
-        patterns:
           - 'vue'
           - 'vue-router'
           - 'pinia'
+          - 'tailwindcss'
+          - '@tailwindcss/postcss'
+          - 'postcss'
         update-types:
           - 'major'
-      linting-major:
+      major-backend:
+        patterns:
+          - 'express'
+          - 'mongoose'
+          - 'mongodb-memory-server'
+        update-types:
+          - 'major'
+      major-tooling:
         patterns:
           - 'eslint'
           - '@eslint/js'
           - 'eslint-plugin-vue'
           - 'eslint-plugin-security'
-        update-types:
-          - 'major'
-      backend-test-tooling-major:
-        patterns:
-          - 'mongodb-memory-server'
-        update-types:
-          - 'major'
-      backend-runtime-major:
-        patterns:
-          - 'express'
-          - 'mongoose'
-        update-types:
-          - 'major'
-      frontend-styling-major:
-        patterns:
-          - 'tailwindcss'
-          - 'postcss'
-          - 'autoprefixer'
-        update-types:
-          - 'major'
-      dev-tooling-major:
-        patterns:
           - 'c8'
           - 'jsdom'
           - '@vite-pwa/assets-generator'
         update-types:
           - 'major'
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: 'github-actions'
     directory: '/'

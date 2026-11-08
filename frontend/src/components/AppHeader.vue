@@ -2,7 +2,7 @@
   <header class="app-header bg-gray-900 border-b border-gray-700 shadow-lg">
     <div class="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
       <span
-        class="app-name bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent font-bold text-xl"
+        class="app-name bg-linear-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent font-bold text-xl"
         >{{ t('appName') }}</span
       >
       <div class="flex items-center gap-4">

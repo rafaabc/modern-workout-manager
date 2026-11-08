@@ -56,7 +56,7 @@
           class="calendar-day aspect-square flex items-center justify-center rounded-lg text-sm cursor-pointer transition"
           :class="
             workoutDays.includes(day)
-              ? 'workout-day font-bold bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg'
+              ? 'workout-day font-bold bg-linear-to-br from-indigo-500 to-purple-600 text-white shadow-lg'
               : 'text-gray-300 hover:bg-gray-700'
           "
           @click="calendarStore.toggleWorkout(day)"
